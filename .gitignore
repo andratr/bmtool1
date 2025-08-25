@@ -48,7 +48,7 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/pnpm-debug.log*
 
-# Build output (Angular, React, Vue, etc.)
+# Build output
 frontend/dist/
 frontend/build/
 
