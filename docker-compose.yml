@@ -52,13 +52,11 @@ services:
       retries: 10
 
   ollama:
-    image: ollama/ollama:latest
+    build: .
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-      - ./ollama_boot.sh:/usr/local/bin/ollama_boot.sh:ro
-    entrypoint: [ "/bin/sh", "-euxc", "/usr/local/bin/ollama_boot.sh" ]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
