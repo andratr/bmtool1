@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8080}  #default
+
+spring:
+  application:
+    name: bmtool1
+
+bmtool1:
+  weaviate:
+    url: ${WEAVIATE_URL:http://weaviate:8080}
+    apiKey: ""
+    className: PairChunk
+  ollama:
+    url: ${OLLAMA_BASE_URL:http://ollama:11434}
+    embeddingModel: nomic-embed-text
+    chatModel: llama3.1:8b
+  openrouter:
+    apiKey: ${OPENROUTER_API_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,mappings
+
+logging:
+  level:
+    org.learningjava.bmtool1: DEBUG
+
+

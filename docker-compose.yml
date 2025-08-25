@@ -1,0 +1,71 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8085:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      SERVER_PORT: "8080"                     # matches compose mapping
+      OLLAMA_BASE_URL: "http://ollama:11434"  # service names, not localhost
+      WEAVIATE_URL: "http://weaviate:8080"
+      OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
+    volumes:
+      - ./secrets:/run/secrets
+      - C:/Users/40744/Desktop/pairs:/app/pairs
+      - C:\Users\40744\Desktop\pair-2:/app/pair-2
+
+    ports:
+      - "8089:8080"        # host:container
+    depends_on:
+      - weaviate
+      - ollama
+    restart: unless-stopped
+
+  weaviate:
+    image: semitechnologies/weaviate:1.25.7
+    ports:
+      - "8080:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 200
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      ENABLE_MODULES: ''
+      CLUSTER_HOSTNAME: 'node1'
+      ENABLE_SCHEMA_AUTO_CREATE: 'true'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/v1/.well-known/ready >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./ollama_boot.sh:/usr/local/bin/ollama_boot.sh:ro
+    entrypoint: [ "/bin/sh", "-euxc", "/usr/local/bin/ollama_boot.sh" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  weaviate_data: {}
+  ollama_data: {}

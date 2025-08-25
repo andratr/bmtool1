@@ -1,0 +1,12 @@
+rules:
+  - plsqlType: ASSIGNMENT_CONST_STRING
+    plsqlContains: "v_exc_code|v_exc_category|v_sol_code"
+    javaType: METHOD
+    javaContains: "eventCode"
+  - plsqlType: CONDITION
+    javaType: METHOD
+    javaContains: "predicate"
+  - plsqlType: INSERT_STATEMENT
+    javaType: METHOD
+    javaContains: "transformation"
+
