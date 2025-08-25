@@ -31,3 +31,31 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Frontend
+
+# Node dependencies
+frontend/node_modules/
+
+# Environment files
+frontend/.env
+frontend/.env.*
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Build output (Angular, React, Vue, etc.)
+frontend/dist/
+frontend/build/
+
+# IDE/editor stuff
+frontend/.vscode/
+frontend/.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
