@@ -1,0 +1,17 @@
+{
+  "classes": [
+    {
+      "class": "PairChunk",
+      "description": "Code pair chunks",
+      "vectorizer": "none",
+      "properties": [
+        { "name": "pairId",       "dataType": ["text"]   },
+        { "name": "plsqlType",    "dataType": ["text"]   },
+        { "name": "javaType",     "dataType": ["text"]   },
+        { "name": "plsqlSnippet", "dataType": ["text"]   },
+        { "name": "javaSnippet",  "dataType": ["text"]   },
+        { "name": "javaHelpers",  "dataType": ["text[]"] }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,9 @@ import org.learningjava.bmtool1.domain.model.RetrievalResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class WeaviateVectorStoreAdapter implements VectorStorePort {
@@ -29,33 +32,96 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
 
     @Override
     public void ensureSchema() {
-        try {
-            var existing = request("GET", "/v1/schema/" + className, null, true);
-            if (existing != null && existing.has("class")) return;
-        } catch (RuntimeException re) {
-            var c = re.getCause();
-            if (!(c instanceof IOException) || !c.getMessage().contains("404")) {
-                throw re;
-            }
+        // Strict: schema must match weaviate.schema.json exactly (for class, vectorizer, properties).
+        // If class is missing -> create. If any difference -> delete and recreate.
+        JsonNode desiredClass = loadDesiredClassFromFileStrict(); // throws if missing
+
+        JsonNode live = getClassIfExists(className);
+        if (live == null) {
+            request("POST", "/v1/schema", desiredClass, false);
+            return;
         }
-        createSchema();
+
+        if (!equalNormalized(desiredClass, live)) {
+            // destructive replace
+            request("DELETE", "/v1/schema/" + className, null, false);
+            request("POST", "/v1/schema", desiredClass, false);
+        }
     }
 
-    private void createSchema() {
-        ObjectNode cls = om.createObjectNode();
-        cls.put("class", className);
-        cls.put("vectorizer", "none");
+    /** Strictly load desired class for this.className from ./weaviate.schema.json; error if file or class is missing. */
+    private JsonNode loadDesiredClassFromFileStrict() {
+        try {
+            Path path = Paths.get("weaviate.schema.json"); // repo root
+            if (!Files.exists(path)) {
+                throw new IllegalStateException("No JSON shema file");
+            }
 
-        ArrayNode props = om.createArrayNode();
-        props.add(prop("pairId", "text"));
-        props.add(prop("plsqlSnippet", "text"));
-        props.add(prop("javaSnippet", "text"));
-        props.add(prop("plsqlType", "text"));
-        props.add(prop("javaType", "text"));
-        props.add(prop("javaHelpers", "text[]")); // ✅ new property for helpers
-        cls.set("properties", props);
+            JsonNode root = om.readTree(Files.readAllBytes(path));
 
-        request("POST", "/v1/schema", cls, false);
+            // Allow either { "classes": [...] } or a single-class object
+            if (root.has("classes") && root.get("classes").isArray()) {
+                for (JsonNode c : root.get("classes")) {
+                    if (className.equals(c.path("class").asText())) return c;
+                }
+                throw new IllegalStateException("Class '" + className + "' not found in weaviate.schema.json");
+            } else if (className.equals(root.path("class").asText())) {
+                return root; // single-class schema file
+            } else {
+                throw new IllegalStateException("Class '" + className + "' not found in weaviate.schema.json");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** GET /v1/schema/{class} and return node, or null on 404. */
+    private JsonNode getClassIfExists(String cname) {
+        try {
+            return request("GET", "/v1/schema/" + cname, null, false);
+        } catch (RuntimeException re) {
+            Throwable c = re.getCause();
+            if (c instanceof IOException && c.getMessage() != null && c.getMessage().contains(" 404 ")) {
+                return null;
+            }
+            throw re;
+        }
+    }
+
+    /** Compare relevant bits only (class, vectorizer, properties name+type), order-insensitive. */
+    private boolean equalNormalized(JsonNode desired, JsonNode live) {
+        ObjectNode dn = normalizeClass(desired);
+        ObjectNode ln = normalizeClass(live);
+        return dn.equals(ln);
+    }
+
+    private ObjectNode normalizeClass(JsonNode c) {
+        ObjectNode out = om.createObjectNode();
+        out.put("class", c.path("class").asText());
+        out.put("vectorizer", c.path("vectorizer").asText("none"));
+
+        Map<String, List<String>> props = new TreeMap<>();
+        JsonNode arr = c.path("properties");
+        if (arr.isArray()) {
+            for (JsonNode p : arr) {
+                String name = p.path("name").asText();
+                List<String> types = new ArrayList<>();
+                JsonNode dt = p.path("dataType");
+                if (dt.isArray()) for (JsonNode t : dt) types.add(t.asText());
+                props.put(name, types);
+            }
+        }
+        ArrayNode propsArr = om.createArrayNode();
+        for (var e : props.entrySet()) {
+            ObjectNode pn = om.createObjectNode();
+            pn.put("name", e.getKey());
+            ArrayNode dts = om.createArrayNode();
+            for (String t : e.getValue()) dts.add(t);
+            pn.set("dataType", dts);
+            propsArr.add(pn);
+        }
+        out.set("properties", propsArr);
+        return out;
     }
 
     @Override
@@ -78,12 +144,9 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
             props.put("plsqlType", m.plsqlType());
             props.put("javaType", m.javaType());
 
-            // ✅ add helpers if present
             if (m.javaHelpers() != null && !m.javaHelpers().isEmpty()) {
                 ArrayNode helpersArr = om.createArrayNode();
-                for (String h : m.javaHelpers()) {
-                    helpersArr.add(h);
-                }
+                for (String h : m.javaHelpers()) helpersArr.add(h);
                 props.set("javaHelpers", helpersArr);
             }
 
@@ -149,15 +212,6 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
     }
 
     // ---------- helpers ----------
-
-    private ObjectNode prop(String name, String dataType) {
-        ObjectNode p = om.createObjectNode();
-        p.put("name", name);
-        ArrayNode dt = om.createArrayNode();
-        dt.add(dataType);
-        p.set("dataType", dt);
-        return p;
-    }
 
     private ArrayNode floatArray(float[] v) {
         ArrayNode a = om.createArrayNode();
