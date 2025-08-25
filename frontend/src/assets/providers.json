@@ -1,0 +1,60 @@
+[
+  {
+    "id": "ollama",
+    "label": "Ollama (local)",
+    "models": [
+      { "id": "llama3.1:8b", "label": "Llama3.1:8b", "provider": "ollama", "parameters": "8B", "context": "N/A" },
+      { "id": "llama3.1:70b", "label": "Llama3.1:70b", "provider": "ollama", "parameters": "70B", "context": "N/A" }
+    ]
+  },
+  {
+    "id": "openrouter",
+    "label": "OpenRouter (cloud)",
+    "models": [
+      { "id": "featherless/qrwkv-72b:free", "label": "Qrwkv 72B", "provider": "featherless", "parameters": "72B", "context": "33K" },
+      { "id": "mistralai/mistral-small-3.1-24b-instruct:free", "label": "Mistral Small 3.1 24B", "provider": "mistralai", "parameters": "24B", "context": "128K" },
+      { "id": "google/gemma-3-4b-instruct:free", "label": "Google Gemma 3 4B", "provider": "google", "parameters": "4B", "context": "128K" },
+      { "id": "google/gemma-3-12b-instruct:free", "label": "Google Gemma 3 12B", "provider": "google", "parameters": "12B", "context": "128K" },
+      { "id": "google/gemma-3-27b-instruct:free", "label": "Google Gemma 3 27B", "provider": "google", "parameters": "27B", "context": "96K" },
+      { "id": "reka/reka-flash-3:free", "label": "Reka Flash 3", "provider": "rekaai", "parameters": "21B", "context": "33K" },
+      { "id": "qwen/qwq-32b:free", "label": "Qwen QwQ 32B", "provider": "qwen", "parameters": "32B", "context": "33K" },
+      { "id": "nousresearch/deephermes-3-llama-3-8b-preview:free", "label": "Nous DeepHermes 3 Llama 3 8B Preview", "provider": "nousresearch", "parameters": "8B", "context": "131K" },
+      { "id": "cognitivecomputations/dolphin-3.0-r1-mistral-24b:free", "label": "Dolphin 3.0 R1 Mistral 24B", "provider": "cognitivecomputations", "parameters": "24B", "context": "33K" },
+      { "id": "cognitivecomputations/dolphin-3.0-mistral-24b:free", "label": "Dolphin 3.0 Mistral 24B", "provider": "cognitivecomputations", "parameters": "24B", "context": "33K" },
+      { "id": "qwen/qwen2.5-vl-72b-instruct:free", "label": "Qwen2.5 VL 72B Instruct", "provider": "qwen", "parameters": "72B", "context": "33K" },
+      { "id": "mistralai/mistral-small-3:free", "label": "Mistral Small 3", "provider": "mistralai", "parameters": "24B", "context": "33K" },
+      { "id": "deepseek/deepseek-r1-distill-qwen-14b:free", "label": "DeepSeek R1 Distill Qwen 14B", "provider": "deepseek", "parameters": "14B", "context": "64K" },
+      { "id": "deepseek/deepseek-r1-distill-llama-70b:free", "label": "DeepSeek R1 Distill Llama 70B", "provider": "deepseek", "parameters": "70B", "context": "8K" },
+      { "id": "deepseek/deepseek-r1:free", "label": "DeepSeek R1", "provider": "deepseek", "parameters": "671B (37B active)", "context": "164K" },
+
+      { "id": "openai/gpt-oss-20b:free", "label": "GPT-OSS 20B", "provider": "openai", "parameters": "20B", "context": "N/A" },
+      { "id": "z-ai/glm-4.5-air:free", "label": "GLM 4.5 Air", "provider": "z-ai", "parameters": "N/A", "context": "N/A" },
+      { "id": "qwen/qwen3-coder:free", "label": "Qwen3 Coder", "provider": "qwen", "parameters": "N/A", "context": "N/A" },
+      { "id": "moonshotai/kimi-k2:free", "label": "Kimi K2", "provider": "moonshotai", "parameters": "N/A", "context": "N/A" },
+      { "id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free", "label": "Dolphin Mistral 24B Venice Edition", "provider": "cognitivecomputations", "parameters": "24B", "context": "N/A" },
+      { "id": "google/gemma-3n-e2b-it:free", "label": "Google Gemma 3n E2B IT", "provider": "google", "parameters": "N/A", "context": "N/A" },
+      { "id": "tencent/hunyuan-a13b-instruct:free", "label": "Hunyuan A13B Instruct", "provider": "tencent", "parameters": "13B", "context": "N/A" },
+      { "id": "tngtech/deepseek-r1t2-chimera:free", "label": "DeepSeek R1T2 Chimera", "provider": "tngtech", "parameters": "N/A", "context": "N/A" },
+      { "id": "mistralai/mistral-small-3.2-24b-instruct:free", "label": "Mistral Small 3.2 24B", "provider": "mistralai", "parameters": "24B", "context": "N/A" },
+      { "id": "moonshotai/kimi-dev-72b:free", "label": "Kimi Dev 72B", "provider": "moonshotai", "parameters": "72B", "context": "N/A" },
+      { "id": "deepseek/deepseek-r1-0528-qwen3-8b:free", "label": "DeepSeek R1 0528 Qwen3 8B", "provider": "deepseek", "parameters": "8B", "context": "N/A" },
+      { "id": "deepseek/deepseek-r1-0528:free", "label": "DeepSeek R1 0528", "provider": "deepseek", "parameters": "N/A", "context": "N/A" },
+      { "id": "sarvamai/sarvam-m:free", "label": "Sarvam M", "provider": "sarvamai", "parameters": "N/A", "context": "N/A" },
+      { "id": "mistralai/devstral-small-2505:free", "label": "Devstral Small 2505", "provider": "mistralai", "parameters": "N/A", "context": "N/A" },
+      { "id": "google/gemma-3n-e4b-it:free", "label": "Google Gemma 3n E4B IT", "provider": "google", "parameters": "N/A", "context": "N/A" },
+      { "id": "qwen/qwen3-4b:free", "label": "Qwen3 4B", "provider": "qwen", "parameters": "4B", "context": "N/A" },
+      { "id": "qwen/qwen3-30b-a3b:free", "label": "Qwen3 30B A3B", "provider": "qwen", "parameters": "30B", "context": "N/A" },
+      { "id": "qwen/qwen3-8b:free", "label": "Qwen3 8B", "provider": "qwen", "parameters": "8B", "context": "N/A" },
+      { "id": "qwen/qwen3-14b:free", "label": "Qwen3 14B", "provider": "qwen", "parameters": "14B", "context": "N/A" },
+      { "id": "qwen/qwen3-235b-a22b:free", "label": "Qwen3 235B A22B", "provider": "qwen", "parameters": "235B", "context": "N/A" },
+      { "id": "tngtech/deepseek-r1t-chimera:free", "label": "DeepSeek R1T Chimera", "provider": "tngtech", "parameters": "N/A", "context": "N/A" },
+      { "id": "shisa-ai/shisa-v2-llama3.3-70b:free", "label": "Shisa v2 Llama 3.3 70B", "provider": "shisa-ai", "parameters": "70B", "context": "N/A" },
+      { "id": "arliai/qwq-32b-arliai-rpr-v1:free", "label": "QwQ 32B ArliAI RPR v1", "provider": "arliai", "parameters": "32B", "context": "N/A" },
+      { "id": "agentica-org/deepcoder-14b-preview:free", "label": "DeepCoder 14B Preview", "provider": "agentica-org", "parameters": "14B", "context": "N/A" },
+      { "id": "moonshotai/kimi-vl-a3b-thinking:free", "label": "Kimi VL A3B Thinking", "provider": "moonshotai", "parameters": "N/A", "context": "N/A" },
+      { "id": "google/gemini-2.5-pro-exp-03-25", "label": "Gemini 2.5 Pro Experimental (03-25)", "provider": "google", "parameters": "N/A", "context": "N/A" },
+      { "id": "deepseek/deepseek-chat-v3-0324:free", "label": "DeepSeek Chat v3 0324", "provider": "deepseek", "parameters": "N/A", "context": "N/A" },
+      { "id": "featherless/qwerky-72b:free", "label": "Qwerky 72B", "provider": "featherless", "parameters": "72B", "context": "N/A" }
+    ]
+  }
+]

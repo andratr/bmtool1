@@ -1,0 +1,65 @@
+<div class="query-container">
+  <h2 class="title">💡 Ask the AI Assistant your PLSQL question: </h2>
+
+  <!-- Question textarea -->
+  <textarea
+    [(ngModel)]="question"
+    placeholder="Type your question..."
+    class="input question-input"
+  ></textarea>
+
+  <!-- Options row -->
+  <div class="options-row">
+    <label class="knn-label">K-nearest matches:</label>
+    <input type="number" [(ngModel)]="k" min="1" class="input number-input" />
+
+    <select [(ngModel)]="selectedProvider" (ngModelChange)="onProviderChange($event)" class="input select">
+      <option *ngFor="let p of providers" [ngValue]="p">
+        {{ p.label }}
+      </option>
+    </select>
+
+    <select [(ngModel)]="selectedModel" class="input select">
+      <option *ngFor="let m of selectedProvider?.models" [ngValue]="m">
+        {{ m.label }}
+      </option>
+    </select>
+
+    <!-- Dummy prompting techniques -->
+    <select class="input select">
+      <option>Default Prompting</option>
+      <option>Chain-of-Thought</option>
+      <option>Few-Shot</option>
+      <option>Zero-Shot</option>
+    </select>
+
+    <button (click)="ask()" class="btn">Ask</button>
+  </div>
+
+  <!-- States -->
+  <div *ngIf="loading" class="status loading">⏳ Thinking…</div>
+  <div *ngIf="error" class="status error">❌ {{ error }}</div>
+
+  <!-- Result -->
+  <div *ngIf="result" class="result">
+    <h3 class="answer-title">✅ Answer</h3>
+    <div class="answer">{{ result!.text }}</div>
+
+    <!-- Citations -->
+    <div *ngIf="result?.citations?.length" class="citations-section">
+      <h4>📚 Citations</h4>
+      <ul class="citations">
+        <li *ngFor="let c of result!.citations" class="citation">
+          <div><strong>Pair ID:</strong> {{ c.mapping.pairId }}</div>
+          <div>
+            <strong>PL/SQL Type:</strong> {{ c.mapping.plsqlType }} |
+            <strong>Java Type:</strong> {{ c.mapping.javaType }} |
+            <strong>Score:</strong> {{ c.score | number:'1.2-2' }}
+          </div>
+          <pre class="snippet"><strong>PL/SQL:</strong> {{ c.mapping.plsqlSnippet }}</pre>
+          <pre class="snippet"><strong>Java:</strong> {{ c.mapping.javaSnippet }}</pre>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

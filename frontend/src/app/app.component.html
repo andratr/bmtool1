@@ -1,0 +1,58 @@
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.collapsed]="collapsed">
+    <div class="sidebar-header">
+      <img src="assets/bookmark.png" class="sidebar-logo" alt="Logo" />
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <img
+          src="assets/arrow-left.svg"
+          alt="Toggle"
+          class="arrow-icon"
+        />
+      </button>
+    </div>
+
+    <ul class="menu">
+      <li routerLink="/hello" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/code.svg" class="icon" />
+        <span class="menu-text">Home</span>
+      </li>
+
+      <li routerLink="/facts" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/book.svg" class="icon" />
+        <span class="menu-text">Why</span>
+      </li>
+
+
+      <li routerLink="/query" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/message-square.svg" class="icon" />
+        <span class="menu-text">Query</span>
+      </li>
+
+      <li routerLink="/experiment" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/umbrella.svg" class="icon" />
+        <span class="menu-text">Experiment</span>
+      </li>
+
+      <li routerLink="/results" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/activity.svg" class="icon" />
+        <span class="menu-text">Results</span>
+
+
+      <li routerLink="/documentation" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/book-open.svg" class="icon" />
+        <span class="menu-text">Documentation</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main">
+    <div class="topbar">
+      <h1>Benchmarking Tool</h1>
+    </div>
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
