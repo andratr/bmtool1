@@ -3,9 +3,12 @@ package org.learningjava.bmtool1.adapters.out.weaviate;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import okhttp3.*;
+import org.learningjava.bmtool1.adapters.in.web.DebugMappingController;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
 import org.learningjava.bmtool1.domain.model.BlockMapping;
 import org.learningjava.bmtool1.domain.model.RetrievalResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,9 +19,16 @@ import java.util.*;
 
 public class WeaviateVectorStoreAdapter implements VectorStorePort {
 
+    private static final Logger log = LoggerFactory.getLogger(DebugMappingController.class);
+
+
     private static final MediaType JSON = MediaType.parse("application/json");
 
-    private final OkHttpClient http = new OkHttpClient();
+    private final OkHttpClient http = new OkHttpClient.Builder()
+            .connectTimeout(java.time.Duration.ofSeconds(5))
+            .readTimeout(java.time.Duration.ofSeconds(5))
+            .writeTimeout(java.time.Duration.ofSeconds(5))
+            .build();
     private final ObjectMapper om = new ObjectMapper();
     private final String baseUrl;
     private final String apiKey;
@@ -32,22 +42,31 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
 
     @Override
     public void ensureSchema() {
-        // Strict: schema must match weaviate.schema.json exactly (for class, vectorizer, properties).
-        // If class is missing -> create. If any difference -> delete and recreate.
-        JsonNode desiredClass = loadDesiredClassFromFileStrict(); // throws if missing
+        JsonNode desiredClass = loadDesiredClassFromFileStrict();
 
         JsonNode live = getClassIfExists(className);
         if (live == null) {
+            log.warn("Schema for class {} does not exist in Weaviate → creating it", className);
             request("POST", "/v1/schema", desiredClass, false);
             return;
         }
 
+        log.debug("Live schema from Weaviate:\n{}", live.toPrettyString());
+        log.debug("Desired schema from file:\n{}", desiredClass.toPrettyString());
+
         if (!equalNormalized(desiredClass, live)) {
-            // destructive replace
+            log.warn("Schema mismatch detected for class {} → dropping & recreating", className);
+            log.debug("Normalized live schema:\n{}", normalizeClass(live).toPrettyString());
+            log.debug("Normalized desired schema:\n{}", normalizeClass(desiredClass).toPrettyString());
+
             request("DELETE", "/v1/schema/" + className, null, false);
             request("POST", "/v1/schema", desiredClass, false);
+        } else {
+            log.info("Schema for class {} is already up to date", className);
         }
     }
+
+
 
     /** Strictly load desired class for this.className from ./weaviate.schema.json; error if file or class is missing. */
     private JsonNode loadDesiredClassFromFileStrict() {
@@ -139,6 +158,7 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
 
             ObjectNode props = om.createObjectNode();
             props.put("pairId", m.pairId());
+            props.put("pairName", m.pairName());
             props.put("plsqlSnippet", m.plsqlSnippet());
             props.put("javaSnippet", m.javaSnippet());
             props.put("plsqlType", m.plsqlType());
@@ -176,6 +196,7 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
               Get {
                 %s(nearVector: {vector: %s}, limit: %d) {
                   pairId
+                  pairName
                   plsqlSnippet
                   javaSnippet
                   plsqlType
@@ -198,6 +219,7 @@ public class WeaviateVectorStoreAdapter implements VectorStorePort {
             for (JsonNode node : arr) {
                 BlockMapping mapping = new BlockMapping(
                         node.path("pairId").asText(),
+                        node.path("pairName").asText(),
                         node.path("plsqlSnippet").asText(),
                         node.path("javaSnippet").asText(),
                         node.path("plsqlType").asText(),

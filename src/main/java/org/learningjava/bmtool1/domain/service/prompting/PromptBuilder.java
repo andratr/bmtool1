@@ -1,5 +1,5 @@
 // src/main/java/org/learningjava/bmtool1/domain/service/PromptBuilder.java
-package org.learningjava.bmtool1.domain.service;
+package org.learningjava.bmtool1.domain.service.prompting;
 
 import org.learningjava.bmtool1.domain.model.RetrievalResult;
 
@@ -24,12 +24,13 @@ public class PromptBuilder {
 
         for (var r : context) {
             var m = r.mapping();
-            sb.append("### Pair ").append(m.pairId())
+            sb.append("### Pair ").append(m.pairId()).append(m.pairName())
                     .append(" (score ").append(String.format("%.3f", r.score())).append(")\n")
                     .append("[PLSQL - ").append(m.plsqlType()).append("]\n")
                     .append(m.plsqlSnippet()).append("\n\n")
                     .append("[JAVA - ").append(m.javaType()).append("]\n")
-                    .append(m.javaSnippet()).append("\n\n");
+                    .append(m.javaSnippet()).append("\n\n")
+                    .append(m.javaHelpers()).append("\n\n");
         }
 
         sb.append("</docs>\n");

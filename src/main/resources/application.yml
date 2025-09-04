@@ -28,3 +28,6 @@ logging:
     org.learningjava.bmtool1: DEBUG
 
 
+ingest:
+  on-replace: true
+  rootDir: /app/data/pairs

@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.learningjava.bmtool1.adapters.in.web.DebugMappingController;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
 import org.learningjava.bmtool1.application.usecase.IngestPairsUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -16,16 +19,20 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 public class StartupTasks implements ApplicationRunner {
+    private static final Logger log = LoggerFactory.getLogger(DebugMappingController.class);
 
     private final VectorStorePort vectorStore;
     private final IngestPairsUseCase ingest;
     private final TaskExecutor executor;
-    private final OkHttpClient http = new OkHttpClient();
+    private final OkHttpClient http = new OkHttpClient.Builder()
+            .connectTimeout(java.time.Duration.ofSeconds(5))
+            .readTimeout(java.time.Duration.ofSeconds(5))
+            .writeTimeout(java.time.Duration.ofSeconds(5))
+            .build();
     private final ObjectMapper om = new ObjectMapper();
 
     @Value("${schema.sync.enabled:true}") private boolean syncEnabled;
@@ -44,41 +51,76 @@ public class StartupTasks implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!syncEnabled) return;
+        if (!syncEnabled) {
+            log.info("Schema sync disabled (schema.sync.enabled=false)");
+            return;
+        }
+
+        log.info("=== StartupTasks BEGIN ===");
+        log.info("Checking Weaviate schema for class {}", className);
 
         CompletableFuture
                 .supplyAsync(this::schemaDiffersFromFile, executor)
                 .thenAcceptAsync(changed -> {
                     if (changed) {
-                        vectorStore.ensureSchema();  // drop & recreate
+                        log.warn("Schema differs → calling ensureSchema()");
+                        vectorStore.ensureSchema();
                         if (ingestOnReplace && !ingestRootDir.isBlank()) {
+                            log.info("Triggering ingest for folder {}", ingestRootDir);
                             try {
                                 ingest.ingestDirectory(ingestRootDir);
                             } catch (Exception e) {
-                                throw new RuntimeException("Ingest failed: " + ingestRootDir, e);
+                                log.error("Ingest failed: {}", ingestRootDir, e);
                             }
                         }
+                    } else {
+                        log.info("Schema is already in sync with file");
                     }
+                    log.info("=== StartupTasks END ===");
                 }, executor);
     }
 
     private boolean schemaDiffersFromFile() {
         try {
             Path json = Path.of("weaviate.schema.json");
-            if (!Files.exists(json)) throw new IllegalStateException("No JSON shema file");
-            JsonNode desired = om.readTree(Files.readAllBytes(json));
-            JsonNode desiredClass = extractClass(desired, className);
+            if (!Files.exists(json)) {
+                log.error("No JSON schema file found at {}", json.toAbsolutePath());
+                throw new IllegalStateException("No JSON schema file");
+            }
 
-            Request req = new Request.Builder()
-                    .url(trim(weaviateUrl) + "/v1/schema/" + className)
-                    .get().build();
+            // Load desired schema file
+            JsonNode desiredRoot = om.readTree(Files.readAllBytes(json));
+            JsonNode desiredClass = extractClass(desiredRoot, className);
+
+            String url = trim(weaviateUrl) + "/v1/schema/" + className;
+            log.info("Fetching schema from {}", url);
+
+            Request req = new Request.Builder().url(url).get().build();
             try (Response resp = http.newCall(req).execute()) {
-                if (resp.code() == 404) return true; // class missing
-                if (!resp.isSuccessful()) throw new RuntimeException("GET schema failed: " + resp.code());
-                JsonNode live = om.readTree(resp.body().string());
-                return !normalize(desiredClass).equals(normalize(live));
+                if (resp.code() == 404) {
+                    log.warn("Weaviate returned 404 → schema missing");
+                    return true;
+                }
+                if (!resp.isSuccessful()) {
+                    throw new RuntimeException("GET schema failed: " + resp.code());
+                }
+
+                String raw = resp.body().string();
+                log.debug("Weaviate raw body: {}", raw);
+
+                JsonNode live = om.readTree(raw);
+
+                // Compare **raw JSON**, not normalized
+                boolean differs = !desiredClass.equals(live);
+
+                log.info("Desired JSON: {}", desiredClass.toPrettyString());
+                log.info("Live JSON   : {}", live.toPrettyString());
+                log.info("Schemas equal? {}", !differs);
+
+                return differs;
             }
         } catch (Exception e) {
+            log.error("Error while comparing schemas", e);
             throw new RuntimeException(e);
         }
     }
@@ -96,33 +138,5 @@ public class StartupTasks implements ApplicationRunner {
             return root;
         }
         throw new IllegalStateException("Class '" + cls + "' not found in weaviate.schema.json");
-    }
-
-    private JsonNode normalize(JsonNode c) {
-        var out = om.createObjectNode();
-        out.put("class", c.path("class").asText());
-        out.put("vectorizer", c.path("vectorizer").asText("none"));
-
-        Map<String, List<String>> map = new TreeMap<>();
-        var arr = c.path("properties");
-        if (arr.isArray()) {
-            for (JsonNode p : arr) {
-                var name = p.path("name").asText();
-                var types = new ArrayList<String>();
-                var dt = p.path("dataType");
-                if (dt.isArray()) dt.forEach(t -> types.add(t.asText()));
-                map.put(name, types);
-            }
-        }
-        var propsArr = om.createArrayNode();
-        for (var e : map.entrySet()) {
-            var pn = out.objectNode();
-            pn.put("name", e.getKey());
-            var dts = out.arrayNode(); e.getValue().forEach(dts::add);
-            pn.set("dataType", dts);
-            propsArr.add(pn);
-        }
-        out.set("properties", propsArr);
-        return out;
     }
 }

@@ -6,9 +6,9 @@ import org.learningjava.bmtool1.application.port.EmbeddingPort;
 import org.learningjava.bmtool1.domain.model.SourcePair;
 import org.learningjava.bmtool1.domain.model.Block;
 import org.learningjava.bmtool1.domain.model.BlockMapping;
-import org.learningjava.bmtool1.domain.service.BlockMapper;
-import org.learningjava.bmtool1.domain.service.PlsqlBlockExtractor;
-import org.learningjava.bmtool1.domain.service.JavaBlockExtractor;
+import org.learningjava.bmtool1.domain.service.templateCreator.BlockMapper;
+import org.learningjava.bmtool1.domain.service.ASTParser.PlsqlBlockExtractor;
+import org.learningjava.bmtool1.domain.service.ASTParser.JavaBlockExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,12 +63,16 @@ public class IngestPairsUseCase {
                         
                         JAVA:
                         {}
+                        
+                        JAVA HELPERS (IF ANY):
+                        {}
                         ------------------------------------------------
                         """,
                         p.plsqlPath(), m.plsqlType(),
                         p.javaPath(), m.javaType(),
                         m.plsqlSnippet(),
-                        m.javaSnippet()
+                        m.javaSnippet(),
+                        m.javaHelpers()
                 );
             }
 

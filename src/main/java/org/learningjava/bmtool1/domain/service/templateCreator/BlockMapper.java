@@ -1,4 +1,4 @@
-package org.learningjava.bmtool1.domain.service;
+package org.learningjava.bmtool1.domain.service.templateCreator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -6,10 +6,12 @@ import org.learningjava.bmtool1.domain.config.MappingConfig;
 import org.learningjava.bmtool1.domain.config.MappingRule;
 import org.learningjava.bmtool1.domain.model.Block;
 import org.learningjava.bmtool1.domain.model.BlockMapping;
+import org.learningjava.bmtool1.domain.service.ASTParser.HelperDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.*;
 
 public class BlockMapper {
@@ -31,45 +33,48 @@ public class BlockMapper {
     public List<BlockMapping> map(List<Block> plsqlBlocks, List<Block> javaBlocks) {
         log.info("Mapping {} PL/SQL blocks to {} Java blocks", plsqlBlocks.size(), javaBlocks.size());
 
-        Map<Block, List<Block>> helpersByMain = helperDetector.detectHelpers(javaBlocks);
+        // Ensure helpers are tagged
+        List<Block> taggedBlocks = helperDetector.detectHelpers(javaBlocks);
+        List<Block> helpers = taggedBlocks.stream().filter(Block::isHelper).toList();
+        List<Block> mains = taggedBlocks.stream().filter(b -> !b.isHelper()).toList();
+
         List<BlockMapping> mappings = new ArrayList<>();
 
         for (Block plsql : plsqlBlocks) {
-            // collect all candidates instead of findFirst
-            List<Block> candidates = javaBlocks.stream()
+            List<Block> candidates = mains.stream()
                     .filter(j -> isEquivalent(plsql, j))
                     .toList();
 
             if (!candidates.isEmpty()) {
-                // choose the best candidate (shortest text usually = more specific, e.g. eventCode)
                 Block javaBlock = candidates.stream()
                         .min(Comparator.comparingInt(b -> b.text().length()))
                         .orElse(candidates.get(0));
 
                 String pairId = UUID.randomUUID().toString();
 
-                List<Block> candidateHelpers = helpersByMain.getOrDefault(javaBlock, List.of());
-                List<String> helpers = filterUsedHelpers(javaBlock, candidateHelpers);
-
-                // set to null if none are used
-                if (helpers.isEmpty()) {
-                    helpers = null;
+                List<String> usedHelpers = filterUsedHelpers(javaBlock, helpers);
+                if (usedHelpers.isEmpty()) {
+                    usedHelpers = null;
                 }
+
+                String pairName = plsql.sourcePath() != null
+                        ? Path.of(plsql.sourcePath()).getFileName().toString().replace(".plsql", "")
+                        : "unknown";
 
                 mappings.add(new BlockMapping(
                         pairId,
+                        pairName, // NEW
                         plsql.text(),
                         javaBlock.text(),
                         plsql.type(),
                         javaBlock.type(),
-                        helpers
+                        usedHelpers
                 ));
 
-                log.debug("Mapped [{}:{}] -> [{}:{}] with {} helpers ({} candidates found)",
+                log.debug("Mapped [{}:{}] -> [{}:{}] with {} helpers",
                         plsql.type(), shorten(plsql.text()),
                         javaBlock.type(), shorten(javaBlock.text()),
-                        helpers == null ? 0 : helpers.size(),
-                        candidates.size());
+                        usedHelpers == null ? 0 : usedHelpers.size());
             } else {
                 log.warn("No mapping found for PLSQL block: {} ({})",
                         plsql.type(), plsql.sourcePath());
@@ -79,6 +84,8 @@ public class BlockMapper {
         return mappings;
     }
 
+
+
     private boolean isEquivalent(Block plsql, Block java) {
         for (MappingRule rule : rules) {
             if (plsql.type().equals(rule.getPlsqlType())
@@ -86,24 +93,18 @@ public class BlockMapper {
 
                 // Check optional plsqlContains
                 if (rule.getPlsqlContains() != null && !rule.getPlsqlContains().isBlank()) {
-                    // extract the left-hand side variable (before :=)
                     String lhs = plsql.text().split(":=", 2)[0].trim().toLowerCase();
-
                     if (!lhs.matches(".*(" + rule.getPlsqlContains().toLowerCase() + ").*")) {
-                        continue; // doesn’t match → skip
+                        continue;
                     }
                 }
-
 
                 String javaText = java.text().toLowerCase();
                 String contains = rule.getJavaContains().toLowerCase();
 
-                // Prefer method signature matches
                 if (javaText.contains(" " + contains + "(") || javaText.startsWith(contains + "(")) {
                     return true;
                 }
-
-                // fallback: substring match
                 if (javaText.contains(contains)) {
                     return true;
                 }
@@ -112,29 +113,22 @@ public class BlockMapper {
         return false;
     }
 
-
-    /**
-     * Keep only helpers that are actually referenced in the javaBlock body.
-     */
     private List<String> filterUsedHelpers(Block javaBlock, List<Block> helpers) {
         String body = javaBlock.text();
 
         return helpers.stream()
                 .filter(helper -> {
                     String firstLine = helper.text().lines().findFirst().orElse("").trim();
-
-                    // Extract identifier (method or field name)
                     String identifier = null;
+
                     if (firstLine.contains("(")) {
-                        // method signature
                         identifier = firstLine
-                                .substring(0, firstLine.indexOf("(")) // before '('
-                                .replaceAll(".*\\s", ""); // last token
+                                .substring(0, firstLine.indexOf("("))
+                                .replaceAll(".*\\s", "");
                     } else if (firstLine.contains("=")) {
-                        // field declaration
                         identifier = firstLine
-                                .substring(0, firstLine.indexOf("=")) // before '='
-                                .replaceAll(".*\\s", ""); // last token
+                                .substring(0, firstLine.indexOf("="))
+                                .replaceAll(".*\\s", "");
                     }
 
                     return identifier != null && body.contains(identifier);
@@ -142,6 +136,7 @@ public class BlockMapper {
                 .map(Block::text)
                 .toList();
     }
+
 
     private String shorten(String text) {
         return text.length() > 40 ? text.substring(0, 37) + "..." : text;

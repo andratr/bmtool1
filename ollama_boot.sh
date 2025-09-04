@@ -11,8 +11,8 @@ done
 
 # Pull the models you want available
 ollama pull nomic-embed-text || true
-ollama pull llama3.1:8b      || true
-ollama pull llama3.1:70b      || true
+#ollama pull llama3.1:8b      || true
+#ollama pull llama3.1:70b      || true
 
 # .....
 # .....

@@ -4,6 +4,7 @@ import java.util.List;
 
 public record BlockMapping(
         String pairId,
+        String pairName,
         String plsqlSnippet,
         String javaSnippet,
         String plsqlType,

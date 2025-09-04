@@ -20,7 +20,8 @@ services:
       OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
     volumes:
       - ./secrets:/run/secrets
-      - ./pairs:/app/pairs
+      - ./files/anon-pairs:/app/data/pairs
+      - ./weaviate.schema.json:/app/weaviate.schema.json:ro
       
 
     ports:

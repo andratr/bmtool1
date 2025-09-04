@@ -2,17 +2,15 @@ package org.learningjava.bmtool1.config;
 
 
 import org.learningjava.bmtool1.adapters.out.fs.FileSystemPairReader;
-import org.learningjava.bmtool1.adapters.out.ollama.OllamaChatAdapter;
 import org.learningjava.bmtool1.adapters.out.ollama.OllamaEmbeddingAdapter;
 import org.learningjava.bmtool1.adapters.out.weaviate.WeaviateVectorStoreAdapter;
-import org.learningjava.bmtool1.application.port.ChatLLMPort;
 import org.learningjava.bmtool1.application.port.EmbeddingPort;
 import org.learningjava.bmtool1.application.port.PairReaderPort;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
 import org.learningjava.bmtool1.application.usecase.IngestPairsUseCase;
 import org.learningjava.bmtool1.application.usecase.QueryRagUseCase;
-import org.learningjava.bmtool1.domain.service.PromptBuilder;
-import org.learningjava.bmtool1.domain.service.PromptRepository;
+import org.learningjava.bmtool1.domain.service.prompting.PromptBuilder;
+import org.learningjava.bmtool1.domain.service.prompting.PromptRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

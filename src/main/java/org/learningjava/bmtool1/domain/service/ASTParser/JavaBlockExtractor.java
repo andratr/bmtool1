@@ -1,5 +1,5 @@
 // src/main/java/org/learningjava/bmtool1/domain/service/JavaBlockExtractor.java
-package org.learningjava.bmtool1.domain.service;
+package org.learningjava.bmtool1.domain.service.ASTParser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;

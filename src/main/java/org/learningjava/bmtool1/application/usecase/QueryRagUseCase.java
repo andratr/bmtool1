@@ -6,7 +6,7 @@ import org.learningjava.bmtool1.application.port.VectorStorePort;
 import org.learningjava.bmtool1.domain.model.Answer;
 import org.learningjava.bmtool1.domain.model.Query;
 import org.learningjava.bmtool1.domain.model.RetrievalResult;
-import org.learningjava.bmtool1.domain.service.PromptBuilder;
+import org.learningjava.bmtool1.domain.service.prompting.PromptBuilder;
 import org.learningjava.bmtool1.config.ChatRegistry;
 
 import org.slf4j.Logger;

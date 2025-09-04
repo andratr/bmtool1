@@ -1,9 +1,11 @@
 // src/main/java/org/learningjava/bmtool1/domain/service/PlsqlBlockExtractor.java
-package org.learningjava.bmtool1.domain.service;
+package org.learningjava.bmtool1.domain.service.ASTParser;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.*;
 import org.learningjava.bmtool1.domain.model.Block;
+import org.springframework.stereotype.Component;
 import plsql.PlSqlLexer;
 import plsql.PlSqlParser;
 import plsql.PlSqlParserBaseListener;
@@ -14,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
 public class PlsqlBlockExtractor {
     private static final Logger log = LoggerFactory.getLogger(PlsqlBlockExtractor.class);
 
@@ -48,8 +50,9 @@ public class PlsqlBlockExtractor {
 
             @Override
             public void enterInsert_statement(PlSqlParser.Insert_statementContext ctx) {
-                blocks.add(new Block("INSERT_STATEMENT", ctx.getText(), plsqlFile.toString()));
-                log.debug("Recognized INSERT: {}", ctx.getText());
+                String sql = ctx.start.getInputStream().getText(new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
+                blocks.add(new Block("INSERT_STATEMENT", sql, plsqlFile.toString()));
+                log.debug("Recognized INSERT block with preserved whitespace.");
             }
 
             @Override
