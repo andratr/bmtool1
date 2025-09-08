@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   frontend:
     build:
@@ -6,29 +8,40 @@ services:
     ports:
       - "8085:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
-      SERVER_PORT: "8080"                     # matches compose mapping
-      OLLAMA_BASE_URL: "http://ollama:11434"  # service names, not localhost
+      SERVER_PORT: "8080"
+      OLLAMA_BASE_URL: "http://ollama:11434"
       WEAVIATE_URL: "http://weaviate:8080"
       OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
-    volumes:
-      - ./secrets:/run/secrets
-      - ./files/anon-pairs:/app/data/pairs
-      - ./weaviate.schema.json:/app/weaviate.schema.json:ro
-      
 
+      # ⬇️ enable startup schema sync + (optional) ingestion-after-create/update
+      SCHEMA_SYNC_ENABLED: "true"
+      WEAVIATE_CLASS_NAME: "PairChunk"   # must match "class" in your weaviate.schema.json
+      INGEST_ON_REPLACE: "true"
+      INGEST_ROOT_DIR: "/app/data/pairs"
+    volumes:
+      - ./secrets:/run/secrets:ro
+      - ./files/anon-pairs:/app/data/pairs
     ports:
       - "8089:8080"        # host:container
     depends_on:
-      - weaviate
-      - ollama
+      weaviate:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
   weaviate:
@@ -52,18 +65,20 @@ services:
       timeout: 5s
       retries: 10
 
+  # Use official image unless you truly need a custom build
   ollama:
-    build: .
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
+      build: ./ollama
+      ports:
+        - "11434:11434"
+      volumes:
+        - ollama_data:/root/.ollama
+      restart: unless-stopped
+      healthcheck:
+        test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
+        interval: 10s
+        timeout: 5s
+        retries: 30
+
 
 volumes:
   weaviate_data: {}
