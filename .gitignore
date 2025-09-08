@@ -62,3 +62,8 @@ frontend/.idea/
 # OS files
 .DS_Store
 Thumbs.db
+
+
+#Env vars
+.env
+.env.*
