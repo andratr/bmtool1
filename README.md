@@ -11,7 +11,7 @@ This tool aims to make it easier to benchmark different code translation AI tech
         * Different LLMs
         * LLMs costs
 
-Due to the AI field's rapid evolvment, a hexagonal architecture was used, which aims to make it easier to plug more techniques, as well as reach any desired state of scalability.
+Due to the AI field's rapid evolution, a hexagonal architecture was used, which aims to make it easier to plug more techniques, as well as reach any desired state of scalability.
 
 ## Why this exists
 
