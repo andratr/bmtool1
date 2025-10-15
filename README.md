@@ -6,10 +6,10 @@
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 This tool aims to make it easier to benchmark different code translation AI techniques. It compares different approaches:
-        * Prompt engineering
-        * Code Chunking
-        * Different LLMs
-        * LLMs costs
+* Prompt engineering
+* Code Chunking
+* Different LLMs
+* LLMs costs
 
 Due to the AI field's rapid evolution, a hexagonal architecture was used, which aims to make it easier to plug more techniques, as well as reach any desired state of scalability.
 
@@ -24,7 +24,7 @@ Keep experiments reproducible by keeping track of your previous tracks.
 
 ### Built With
 
-* * [![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io)
+* [![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io)
 * [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge\&logo=springboot\&logoColor=white)](https://spring.io/projects/spring-boot)
 * [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge\&logo=docker\&logoColor=white)](https://www.docker.com/)
 * [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge\&logo=nginx\&logoColor=white)](https://nginx.org/)
