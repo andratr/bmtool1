@@ -1,27 +1,38 @@
 <div class="containerr">
-<div class="container"
-     [style.width.px]="containerSize"
-     [style.height.px]="containerSize"
-     [style.left.px]="offsetX"
-     [style.top.px]="offsetY">
-  <div class="wrapper">
-    <svg [attr.viewBox]="'0 0 ' + containerSize + ' ' + containerSize"
-         [attr.width]="containerSize"
-         [attr.height]="containerSize">
-      <circle [attr.cx]="center" [attr.cy]="center" [attr.r]="radius" class="wheel"></circle>
-    </svg>
+  <!-- 🔥 Carousel Title -->
+  <div class="carousel-title">Why is software migration valuable?</div>
 
-    <div *ngFor="let slide of slides; let i = index"
-         class="item"
-         [ngStyle]="{ left: getPosition(i).x + 'px', top: getPosition(i).y + 'px' }">
-      {{ slide.title }}
+  <div class="container"
+       [style.width.px]="containerSize"
+       [style.height.px]="containerSize"
+       [style.left.px]="offsetX"
+       [style.top.px]="offsetY">
+    <div class="wrapper">
+      <svg [attr.viewBox]="'0 0 ' + containerSize + ' ' + containerSize"
+           [attr.width]="containerSize"
+           [attr.height]="containerSize">
+        <circle [attr.cx]="center" [attr.cy]="center" [attr.r]="radius" class="wheel"></circle>
+      </svg>
+
+      <!-- 🔥 Cards -->
+      <div *ngFor="let slide of slides; let i = index"
+           class="item"
+           [ngStyle]="{ left: getPosition(i).x + 'px', top: getPosition(i).y + 'px' }"
+           [class.active]="i === activeIndex">
+        <div class="card">
+          <img [src]="slide.image" alt="{{ slide.title }}" class="card-img">
+          <div class="card-content">
+            <h3 class="card-title">{{ slide.title }}</h3>
+            <p class="card-text">{{ slide.text }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- 🔥 Controls moved OUTSIDE container -->
-<div class="controls">
-  <button (click)="prev()">‹</button>
-  <button (click)="next()">›</button>
-</div>
+  <!-- 🔥 Controls -->
+  <div class="controls">
+    <button (click)="prev()">‹</button>
+    <button (click)="next()">›</button>
+  </div>
 </div>

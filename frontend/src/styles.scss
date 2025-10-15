@@ -1,1 +1,11 @@
- 
+/* ==========
+   Global resets
+   ========== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+* { box-sizing: border-box; }
+app-root, :host { display: block; height: 100%; }
+svg { display: block; } /* kill baseline gap */

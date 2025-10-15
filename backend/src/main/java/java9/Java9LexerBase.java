@@ -28,34 +28,28 @@ package java9;/*
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.Interval;
 
-public abstract class Java9LexerBase extends Lexer
-{
+public abstract class Java9LexerBase extends Lexer {
     public Java9LexerBase(CharStream input) {
         super(input);
     }
 
-    public boolean Check1()
-    {
+    public boolean Check1() {
         return Character.isJavaIdentifierStart(_input.LA(-1));
     }
 
-    public boolean Check2()
-    {
-        return Character.isJavaIdentifierStart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)));
+    public boolean Check2() {
+        return Character.isJavaIdentifierStart(Character.toCodePoint((char) _input.LA(-2), (char) _input.LA(-1)));
     }
 
-    public boolean Check3()
-    {
+    public boolean Check3() {
         return Character.isJavaIdentifierPart(_input.LA(-1));
     }
 
-    public boolean Check4()
-    {
-        return Character.isJavaIdentifierPart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)));
+    public boolean Check4() {
+        return Character.isJavaIdentifierPart(Character.toCodePoint((char) _input.LA(-2), (char) _input.LA(-1)));
     }
 }

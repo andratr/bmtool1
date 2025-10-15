@@ -1,9 +1,9 @@
 package plsql;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.TokenStream;
 
-public abstract class PlSqlParserBase extends Parser
-{
+public abstract class PlSqlParserBase extends Parser {
     private boolean _isVersion12 = true;
     private boolean _isVersion10 = true;
 

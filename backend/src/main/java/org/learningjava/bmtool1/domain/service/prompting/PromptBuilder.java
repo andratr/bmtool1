@@ -2,14 +2,16 @@
 package org.learningjava.bmtool1.domain.service.prompting;
 
 import org.learningjava.bmtool1.domain.model.RetrievalResult;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class PromptBuilder {
 
-    private final PromptRepository repo;
+    private final PromptCatalog repo;
 
-    public PromptBuilder(PromptRepository repo) {
+    public PromptBuilder(PromptCatalog repo) {
         this.repo = repo;
     }
 

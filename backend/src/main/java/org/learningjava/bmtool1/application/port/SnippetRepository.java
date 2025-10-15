@@ -7,8 +7,11 @@ import java.util.Map;
 
 public interface SnippetRepository {
     void savePending(PlsqlSnippet snippet);
+
     List<PlsqlSnippet> findPending();
+
     void saveTranslated(PlsqlSnippet snippet);
+
     List<PlsqlSnippet> findTranslatedByEventCode(String eventCode);
 
     // ✅ all translated snippets flat

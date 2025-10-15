@@ -2,10 +2,10 @@
   <!-- Sidebar -->
   <div class="sidebar" [class.collapsed]="collapsed">
     <div class="sidebar-header">
-      <img src="assets/bookmark.png" class="sidebar-logo" alt="Logo" />
+      <img src="assets/icons/bookmark.png" class="sidebar-logo" alt="Logo" />
       <button class="toggle-btn" (click)="toggleSidebar()">
         <img
-          src="assets/arrow-left.svg"
+          src="assets/icons/arrow-left.svg"
           alt="Toggle"
           class="arrow-icon"
         />
@@ -14,33 +14,37 @@
 
     <ul class="menu">
       <li routerLink="/hello" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/code.svg" class="icon" />
+        <img src="assets/icons/code.svg" class="icon" />
         <span class="menu-text">Home</span>
       </li>
 
       <li routerLink="/facts" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/book.svg" class="icon" />
+        <img src="assets/icons/book.svg" class="icon" />
         <span class="menu-text">Why</span>
       </li>
 
-
       <li routerLink="/query" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/message-square.svg" class="icon" />
+        <img src="assets/icons/message-square.svg" class="icon" />
         <span class="menu-text">Query</span>
       </li>
 
+      <li routerLink="/ingestion" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <img src="assets/icons/file.svg" class="icon" />
+        <span class="menu-text">Files</span>
+      </li>
+
       <li routerLink="/experiment" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/umbrella.svg" class="icon" />
+        <img src="assets/icons/umbrella.svg" class="icon" />
         <span class="menu-text">Experiment</span>
       </li>
 
       <li routerLink="/results" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/activity.svg" class="icon" />
+        <img src="assets/icons/activity.svg" class="icon" />
         <span class="menu-text">Results</span>
 
 
       <li routerLink="/documentation" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        <img src="assets/book-open.svg" class="icon" />
+        <img src="assets/icons/book-open.svg" class="icon" />
         <span class="menu-text">Documentation</span>
       </li>
     </ul>

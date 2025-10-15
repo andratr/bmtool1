@@ -3,17 +3,18 @@ package org.learningjava.bmtool1.application.usecase;
 import org.learningjava.bmtool1.application.port.ChatLLMPort;
 import org.learningjava.bmtool1.application.port.EmbeddingPort;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
+import org.learningjava.bmtool1.domain.service.ChatRegistry;
 import org.learningjava.bmtool1.domain.model.Answer;
 import org.learningjava.bmtool1.domain.model.Query;
 import org.learningjava.bmtool1.domain.model.RetrievalResult;
 import org.learningjava.bmtool1.domain.service.prompting.PromptBuilder;
-import org.learningjava.bmtool1.config.ChatRegistry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class QueryRagUseCase {
     private static final Logger log = LoggerFactory.getLogger(QueryRagUseCase.class);
 
@@ -36,7 +37,7 @@ public class QueryRagUseCase {
     }
 
     /**
-     * Ask a question with Retrieval-Augmented Generation (RAG).
+     * Ask a question with RAG
      */
     public Answer ask(Query q, int k, String providerId, String model) {
         // 1) Get provider

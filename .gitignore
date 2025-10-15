@@ -1,69 +1,49 @@
-HELP.md
+# === Back End (Java/Maven)
 target/
-.mvn/wrapper/maven-wrapper.jar
+.mvn/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-# Secrets (never commit API keys or credentials)
+# Secrets
 secrets/
+.env.secrets
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
+# === IDEs & Editors
+# IntelliJ IDEA
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# VS Code
+.vscode/
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+.sts4-cache
+
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
 
 
-### Frontend
-
-# Node dependencies
+# === Front End
 frontend/node_modules/
+frontend/dist/
+frontend/build/
 
-# Environment files
-frontend/.env
-frontend/.env.*
-
-# Logs
+# Frontend logs
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/pnpm-debug.log*
 
-# Build output
-frontend/dist/
-frontend/build/
 
-# IDE/editor stuff
-frontend/.vscode/
-frontend/.idea/
-
-# OS files
+# === OS files
 .DS_Store
 Thumbs.db
-
-
-#Env vars
-.env
-.env.*

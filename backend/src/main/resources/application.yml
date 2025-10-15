@@ -1,19 +1,23 @@
-server:
-  port: ${SERVER_PORT:8080}  #default
-
 spring:
+  config:
+    import: "optional:file:/app/config/app.env.properties"
   application:
     name: bmtool1
 
+server:
+  port: ${BACKEND_PORT}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+
 bmtool1:
   weaviate:
-    url: ${WEAVIATE_URL:http://weaviate:8080}
-    apiKey: ""
-    className: PairChunk
+    url: http://weaviate:${WEAVIATE_PORT}
+    className: ${WEAVIATE_CLASS_NAME:PairChunk}
   ollama:
-    url: ${OLLAMA_BASE_URL:http://ollama:11434}
-    embeddingModel: nomic-embed-text
-    chatModel: llama3.1:8b
+    url: http://ollama:${OLLAMA_PORT}
+    embeddingModel: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text} #default model #todo: delete this
   openrouter:
     apiKey: ${OPENROUTER_API_KEY}
 
@@ -22,12 +26,20 @@ management:
     web:
       exposure:
         include: health,info,mappings
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 logging:
   level:
-    org.learningjava.bmtool1: DEBUG
+    org.learningjava.bmtool1: ${APP_LOG_LEVEL:DEBUG}
 
-
+#todo
 ingest:
-  on-replace: true
-  rootDir: /app/data/pairs
+  on-replace: ${INGEST_ON_REPLACE:true}
+  rootDir: ${INGEST_ROOT_DIR:/app/data/pairs}
+
+
+#todo automatic restart not working
+

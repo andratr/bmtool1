@@ -1,0 +1,13 @@
+{
+  "class": "FrameworkSnippet",
+  "description": "Framework API symbols and tiny usage examples for codegen",
+  "vectorizer": "none",
+  "properties": [
+    {"name": "className",       "dataType": ["text"]},
+    {"name": "symbol",          "dataType": ["text"]},
+    {"name": "methodSignature", "dataType": ["text"]},
+    {"name": "snippet",         "dataType": ["text"]},
+    {"name": "kind",            "dataType": ["text"]},
+    {"name": "tags",            "dataType": ["text[]"]}
+  ]
+}

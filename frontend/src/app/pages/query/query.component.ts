@@ -1,9 +1,7 @@
-// src/app/pages/query/query.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
 
 type Citation = {
   mapping: {
@@ -71,7 +69,7 @@ export class QueryComponent implements OnInit {
     this.result = undefined;
     this.error = undefined;
 
-    this.http.post<QueryResponse>(`${environment.apiUrl}/query`, {
+    this.http.post<QueryResponse>(`api/query`, {
       question: this.question,
       k: this.k,
       provider: this.selectedProvider.id,

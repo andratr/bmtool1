@@ -1,47 +1,58 @@
 package org.learningjava.bmtool1.application.usecase;
 
+import org.learningjava.bmtool1.application.port.BlockExtractorPort;
+import org.learningjava.bmtool1.application.port.EmbeddingPort;
 import org.learningjava.bmtool1.application.port.PairReaderPort;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
-import org.learningjava.bmtool1.application.port.EmbeddingPort;
-import org.learningjava.bmtool1.domain.model.SourcePair;
 import org.learningjava.bmtool1.domain.model.Block;
 import org.learningjava.bmtool1.domain.model.BlockMapping;
-import org.learningjava.bmtool1.domain.service.templateCreator.BlockMapper;
-import org.learningjava.bmtool1.domain.service.ASTParser.PlsqlBlockExtractor;
-import org.learningjava.bmtool1.domain.service.ASTParser.JavaBlockExtractor;
+import org.learningjava.bmtool1.domain.model.SourcePair;
+import org.learningjava.bmtool1.domain.service.ingest.BlockMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Use case: Ingest PL/SQL ↔ Java pairs and map blocks to methods.
- */
+@Service
 public class IngestPairsUseCase {
 
-    private final PairReaderPort pairReader;
-    private final BlockMapper blockMapper = new BlockMapper();
-    private final PlsqlBlockExtractor plsqlExtractor = new PlsqlBlockExtractor();
-    private final JavaBlockExtractor javaExtractor = new JavaBlockExtractor();
-    private final VectorStorePort store;
-    private final EmbeddingPort embedding;
     private static final Logger log = LoggerFactory.getLogger(IngestPairsUseCase.class);
 
-    public IngestPairsUseCase(PairReaderPort pairReader,
-                              VectorStorePort store,
-                              EmbeddingPort embedding) {
+    private final PairReaderPort pairReader;
+    private final BlockMapper blockMapper;
+    private final BlockExtractorPort plsqlExtractor;
+    private final BlockExtractorPort javaExtractor;
+    private final VectorStorePort store;
+    private final EmbeddingPort embedding;
+
+    public IngestPairsUseCase(
+            PairReaderPort pairReader,
+            @Qualifier("plsqlBlockExtractor") BlockExtractorPort plsqlExtractor,
+            @Qualifier("javaBlockExtractor") BlockExtractorPort javaExtractor,
+            BlockMapper blockMapper,
+            VectorStorePort store,
+            EmbeddingPort embedding
+    ) {
         this.pairReader = pairReader;
+        this.plsqlExtractor = plsqlExtractor;
+        this.javaExtractor = javaExtractor;
+        this.blockMapper = blockMapper;
         this.store = store;
         this.embedding = embedding;
     }
 
-    /**
-     * Discover all pairs under a directory and produce block-to-method mappings.
-     */
     public List<BlockMapping> ingestDirectory(String rootDir) throws Exception {
         List<SourcePair> pairs = pairReader.discoverPairs(rootDir);
+
+        if (pairs == null || pairs.isEmpty()) {
+            log.warn("No SQL–Java pairs found in {}", rootDir);
+            throw new IllegalStateException("No SQL–Java pairs found in " + rootDir);
+        }
+
         List<BlockMapping> allMappings = new ArrayList<>();
 
         for (var p : pairs) {
@@ -55,19 +66,19 @@ public class IngestPairsUseCase {
 
             for (var m : mappings) {
                 log.info("""
-                        🔗 Mapping found:
-                        [ {} ] {}  ->  [ {} ] {}
-                        ------------------------------------------------
-                        PLSQL:
-                        {}
-                        
-                        JAVA:
-                        {}
-                        
-                        JAVA HELPERS (IF ANY):
-                        {}
-                        ------------------------------------------------
-                        """,
+                                🔗 Mapping found:
+                                [ {} ] {}  ->  [ {} ] {}
+                                ------------------------------------------------
+                                PLSQL:
+                                {}
+                                
+                                JAVA:
+                                {}
+                                
+                                JAVA HELPERS (IF ANY):
+                                {}
+                                ------------------------------------------------
+                                """,
                         p.plsqlPath(), m.plsqlType(),
                         p.javaPath(), m.javaType(),
                         m.plsqlSnippet(),
@@ -79,14 +90,15 @@ public class IngestPairsUseCase {
             allMappings.addAll(mappings);
         }
 
-        // ✅ Persist into vector store
         if (!allMappings.isEmpty()) {
+            store.ensureSchema();
             List<float[]> vectors = allMappings.stream()
                     .map(m -> embedding.embed(m.plsqlSnippet() + " " + m.javaSnippet()))
                     .toList();
 
-            store.ensureSchema();
             store.upsertMappings(allMappings, vectors);
+        } else {
+            log.warn("Pairs were discovered, but no block mappings resulted for {}", rootDir);
         }
 
         return allMappings;

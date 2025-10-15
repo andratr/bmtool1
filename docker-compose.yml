@@ -1,53 +1,137 @@
-version: "3.9"
-
 services:
-  frontend:
+  # -------------------- FRONTEND (PROD) --------------------
+  frontend-prod:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: prod
+      args:
+        FRONTEND_PORT: ${FRONTEND_PORT}
     ports:
-      - "8085:80"
-    depends_on:
-      backend:
-        condition: service_healthy
-    restart: unless-stopped
+      - "${FRONTEND_HOST_PORT}:${FRONTEND_PORT}"
+    profiles: [ "prod" ]
+    env_file:
+      - .env
+      - .env.secrets
 
+  # -------------------- FRONTEND (DEV) ---------------------
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        FRONTEND_PORT: ${FRONTEND_PORT}
+    environment:
+      # show deprecation stack and all warnings
+      NODE_OPTIONS: "--trace-deprecation --trace-warnings"
+      # verbose vite & http-proxy logs
+      DEBUG: "vite:*,http-proxy*"
+      # make sure these exist for the proxy:
+      BACKEND_SERVICE: "backend-dev"
+      BACKEND_PORT: "${BACKEND_PORT}"
+      FRONTEND_PORT: "${FRONTEND_PORT}"
+
+    command: sh -lc "npm run start -- --host 0.0.0.0 --port ${FRONTEND_PORT}"
+    ports:
+      - "${FRONTEND_HOST_PORT}:${FRONTEND_PORT}"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    profiles: [ "dev" ]
+    env_file:
+      - .env
+      - .env.secrets
+
+
+  # -------------------- BACKEND (PROD) ---------------------
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: prod
     environment:
-      SERVER_PORT: "8080"
-      OLLAMA_BASE_URL: "http://ollama:11434"
-      WEAVIATE_URL: "http://weaviate:8080"
+      SERVER_PORT: "${BACKEND_PORT}"
+      OLLAMA_BASE_URL: "http://ollama:${OLLAMA_PORT}"
+      WEAVIATE_URL: "http://weaviate:${WEAVIATE_PORT}"
       OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
 
-      # ⬇️ enable startup schema sync + (optional) ingestion-after-create/update
       SCHEMA_SYNC_ENABLED: "true"
-      WEAVIATE_CLASS_NAME: "PairChunk"   # must match "class" in your weaviate.schema.json
+      WEAVIATE_CLASS_NAME: "PairChunk"
       INGEST_ON_REPLACE: "true"
       INGEST_ROOT_DIR: "/app/data/pairs"
     volumes:
       - ./secrets:/run/secrets:ro
       - ./files/anon-pairs:/app/data/pairs
-    ports:
-      - "8089:8080"        # host:container
+      - ../.env:/app/config/app.env.properties:ro
+    expose:
+      - "${BACKEND_PORT}"
     depends_on:
       weaviate:
         condition: service_healthy
       ollama:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP"]
       interval: 10s
       timeout: 3s
       retries: 10
     restart: unless-stopped
+    profiles: ["prod"]
+    env_file:
+      - .env
+      - .env.secrets
 
+  # -------------------- BACKEND (DEV / live reload) --------
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    working_dir: /app
+    environment:
+      SERVER_PORT: "${BACKEND_PORT}"
+      OLLAMA_BASE_URL: "http://ollama:${OLLAMA_PORT}"
+      WEAVIATE_URL: "http://weaviate:${WEAVIATE_PORT}"
+      OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
+
+      SCHEMA_SYNC_ENABLED: "true"
+      WEAVIATE_CLASS_NAME: "PairChunk"
+      INGEST_ON_REPLACE: "true"
+      INGEST_ROOT_DIR: "/app/data/pairs"
+
+      SPRING_PROFILES_ACTIVE: "dev"
+      JAVA_TOOL_OPTIONS: "-Dspring.devtools.restart.enabled=true"
+    volumes:
+      - ./backend:/app
+      - ./secrets:/run/secrets:ro
+      - ./files/anon-pairs:/app/data/pairs
+      - ~/.m2:/root/.m2 # cache maven repo for speed
+      - ../.env:/app/config/app.env.properties:ro #todo: remove this, here and in prod
+
+    entrypoint: ["mvn"]
+    command: ["spring-boot:run"]
+    ports:
+      - "${BACKEND_HOST_DEV_PORT}:${BACKEND_PORT}"   # dev only
+    depends_on:
+      weaviate:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    profiles: ["dev"]
+    env_file:
+      - .env
+      - .env.secrets
+
+  # -------------------- WEAVIATE ----------------------------
   weaviate:
     image: semitechnologies/weaviate:1.25.7
-    ports:
-      - "8080:8080"
     environment:
       QUERY_DEFAULTS_LIMIT: 200
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
@@ -56,29 +140,32 @@ services:
       ENABLE_MODULES: ''
       CLUSTER_HOSTNAME: 'node1'
       ENABLE_SCHEMA_AUTO_CREATE: 'true'
+      HTTP_PORT: "${WEAVIATE_PORT}"
+    expose:
+      - "${WEAVIATE_PORT}"
     volumes:
       - weaviate_data:/var/lib/weaviate
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/v1/.well-known/ready >/dev/null 2>&1 || exit 1"]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:${WEAVIATE_PORT}/v1/.well-known/ready >/dev/null 2>&1 || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
 
-  # Use official image unless you truly need a custom build
+
+  # -------------------- OLLAMA ------------------------------
   ollama:
-      build: ./ollama
-      ports:
-        - "11434:11434"
-      volumes:
-        - ollama_data:/root/.ollama
-      restart: unless-stopped
-      healthcheck:
-        test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
-        interval: 10s
-        timeout: 5s
-        retries: 30
-
+    build: ./ollama
+    expose:
+      - "${OLLAMA_PORT}"                              # internal only
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
 volumes:
   weaviate_data: {}
