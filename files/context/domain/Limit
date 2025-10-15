@@ -1,0 +1,210 @@
+import com.example.dq.foundation.data.MonetaryValue;
+import com.example.dq.foundation.data.OptionalDate;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static itrf.vortex.spdi.util.OptionalDateUtil.getMaxDate;
+
+@Getter
+@Setter
+@ToString
+public final class Limit implements Sp4ConsumerEntity {
+    @ToString.Exclude
+    private final List<Outstanding> outstdngs = new ArrayList<>();
+    @ToString.Exclude
+    private final List<Limit> subLimits = new ArrayList<>();
+    private Long pk;
+    private String limitId;
+    private LimitTypeIndicator limitTypeInd;
+    private String localCustId;
+    @ToString.Exclude
+    private Customer cust;
+    private String higherLimitId;
+    @ToString.Exclude
+    private Limit higherLimit;
+    private String prodType; // This is referred to as LimitType or FacilityType in the FD
+    private MonetaryValue origLimitAmt;
+    private MonetaryValue limitAmt;
+    private OptionalDate limitStartDt = OptionalDate.empty();
+    private OptionalDate limitEndDt = OptionalDate.empty();
+    private String purpose;
+    private String bookOffice;
+    private String salesChnl;
+    private String exampleLegalEntity;
+    private String baseEntity;
+    private String creditRatingScoreAtApp;
+    private String creditRiskRating;
+    @ToString.Exclude
+    private List<RiskRating> riskRatingsLvl1 = new ArrayList<>();
+    @ToString.Exclude
+    private List<RiskRating> riskRatingsLvl2 = new ArrayList<>();
+    @ToString.Exclude
+    private List<RiskRating> riskRatingsLvl3 = new ArrayList<>();
+    private BigDecimal probOfDefaultAtOrig;
+    private OptionalDate probOfDefaultOrigDt = OptionalDate.empty();
+    private String bankCreditRiskRatingAtOrig;
+    private BigDecimal probOfDefault;
+    private BigDecimal lossGivenDefault;
+    private MonetaryValue expAtDefault;
+    private String contractualMat;
+    private String revolving;
+    private String advised;
+    private String committed;
+    private String forbearanceMeas;
+    private String forbearanceStatus;
+    private OptionalDate forbearanceStartDt = OptionalDate.empty();
+    private OptionalDate forbearanceProbStartDt = OptionalDate.empty();
+    private OptionalDate offerIssueDt = OptionalDate.empty();
+    private OptionalDate docCompletionDt = OptionalDate.empty();
+    private String limitLifecycleStatus;
+    private OptionalDate limitLifecycleStatusDt = OptionalDate.empty();
+    private OptionalDate offerAcceptDt = OptionalDate.empty();
+    private String bridgeLoan;
+    private String creditFraud;
+    private Duration noticePeriod;
+    private String defaultReason;
+    private OptionalDate derecognitionDt = OptionalDate.empty();
+    private String derecognitionReason;
+    private String purchasedOrOrigCreditImpaired;
+    private String problemLoanDept;
+    private String pdArrearsSubmodelUsed;
+    private String forbearanceMeas2;
+    private String forbearanceMeas3;
+    private String forbearanceMeas4;
+    private String forbearanceMeas5;
+    private String recourse;
+    private String financingType;
+    private Duration defaultDaysPastDue;
+    private OptionalDate absBreachStartDt = OptionalDate.empty();
+    private MonetaryValue absBreachPastDueAmt;
+    private OptionalDate absBreachEndDt = OptionalDate.empty();
+    private OptionalDate relBreachStartDt = OptionalDate.empty();
+    private MonetaryValue relBreachPastDueAmt;
+    private MonetaryValue relBreachOutstdngAmt;
+    private OptionalDate relBreachEndDt = OptionalDate.empty();
+    private String debtCollection;
+    private MonetaryValue npvOld;
+    private MonetaryValue npvNew;
+    private BigDecimal npvLoss;
+    private OptionalDate npvImpactCalcDt = OptionalDate.empty();
+    private String origLimitId;
+    private String origHigherLimitId;
+    private String origSystemId;
+    private String newLimitId;
+    private String newHigherLimitId;
+    private String newSystemId;
+    private OptionalDate forbearanceMeasStartDt = OptionalDate.empty();
+    private OptionalDate forbearanceMeasEndDt = OptionalDate.empty();
+    private OptionalDate forbearanceMeasStartDt2 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasEndDt2 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasStartDt3 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasEndDt3 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasStartDt4 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasEndDt4 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasStartDt5 = OptionalDate.empty();
+    private OptionalDate forbearanceMeasEndDt5 = OptionalDate.empty();
+    private String inForbearance;
+    private OptionalDate transactorOverdraftLastDrawDt = OptionalDate.empty();
+    private OptionalDate transactorCardLastDtNotRepaidInFull = OptionalDate.empty();
+    private String eadModel;
+    private MonetaryValue eadIfrs9;
+    private MonetaryValue eadIncap;
+    private MonetaryValue eadRegcap;
+    private String lgdModel;
+    private String lgdSegment;
+    private String lgdPool;
+    private BigDecimal facilityLoanToValueNorm;
+    private String facilityLoanToIncomeNorm;
+    private String eadCalcId;
+    private String lgdCalcId;
+    private OptionalDate creditCommitmentStartDt = OptionalDate.empty();
+    private String creditCommitment;
+    private OptionalDate firstDrawDt = OptionalDate.empty();
+    private String pdCalcId;
+    private String collectiveSicrInd;
+    private OptionalDate collectiveSicrStartDt = OptionalDate.empty();
+    private OptionalDate collectiveSicrEndDt = OptionalDate.empty();
+    private boolean generated = false;
+
+    public OptionalDate getLatestForbearanceMeasStartDt() {
+        return getMaxDate(
+                forbearanceMeasStartDt,
+                forbearanceMeasStartDt2,
+                forbearanceMeasStartDt3,
+                forbearanceMeasStartDt4,
+                forbearanceMeasStartDt5
+        );
+    }
+
+    /**
+     * Returns the latest risk rating for the given rating level.
+     *
+     * @param ratingLevel The rating level to search for
+     * @return The latest risk rating for the given rating level, or {@code null} if no risk rating was found
+     */
+    public RiskRating getLatestRiskRating(String ratingLevel) {
+        return switch (ratingLevel) {
+            case "1" -> findLatestRiskRating(riskRatingsLvl1);
+            case "2" -> findLatestRiskRating(riskRatingsLvl2);
+            case "3" -> findLatestRiskRating(riskRatingsLvl3);
+            default -> null;
+        };
+    }
+
+    private RiskRating findLatestRiskRating(List<RiskRating> riskRatings) {
+        return riskRatings.stream()
+                .max(Comparator.comparing(riskRating ->
+                        riskRating.getCreditRiskRatingDate().localDate()))
+                .orElse(null);
+    }
+
+    /**
+     * Searches for a circular reference where this limit appears in its own parent hierarchy.
+     *
+     * @return An {@code Optional} set of limits making up the circular reference, or an empty {@code Optional} if no
+     * circular reference was found
+     */
+    public Optional<Set<Limit>> findCircularReference() {
+        Set<Limit> seen = new HashSet<>();
+        Limit current = this.getHigherLimit();
+        while (current != this && current != current.getHigherLimit() && !seen.contains(current)) {
+            seen.add(current);
+            current = current.getHigherLimit();
+        }
+        if (current == current.getHigherLimit() || seen.contains(current)) {
+            return Optional.empty();
+        }
+        seen.add(this);
+        return Optional.of(seen);
+    }
+
+    public enum LimitTypeIndicator {
+        /**
+         * An independent limit is a limit which has no higher or lower level limits associated with it. An independent
+         * limit should have itself as its higher level limit.
+         */
+        INDEPENDENT,
+
+        /**
+         * A cross limit is a limit which has lower level limits associated with it. Within a limit tree, a cross limit
+         * represents any node which is not a leaf.
+         */
+        CROSS,
+
+        /**
+         * A sub limit is a limit which does not have any lower level limits associated with it, but does have a higher
+         * level limit. Within a limit tree, a sub limit represents any leaf node.
+         */
+        SUB
+    }
+}

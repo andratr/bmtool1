@@ -1,0 +1,21 @@
+import com.example.dq.foundation.DqContext;
+import com.example.dq.foundation.EventService;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+
+@Getter
+@RequiredArgsConstructor
+public class ConsumerDqContext implements DqContext {
+    private final EventService eventService;
+    private final ReferenceDataCache cache;
+    private final ConsumerEnrichmentService enrichmentService;
+    private final String sourceSystemId;
+    private final LocalDate reportingDate;
+
+    @Override
+    public EventService getEventService() {
+        return eventService;
+    }
+}

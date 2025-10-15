@@ -1,0 +1,67 @@
+import java.math.BigDecimal;
+
+public record MonetaryValue(String currency, BigDecimal value) {
+
+    /**
+     * The expected number of characters in a currency string.
+     */
+    private static final int CURRENCY_SIZE = 3;
+
+    /**
+     * A {@code MonetaryValue} of zero euros.
+     */
+    public static final MonetaryValue EUR_ZERO = new MonetaryValue("EUR", BigDecimal.ZERO);
+
+    /**
+     * Returns the zero value for the given currency.
+     *
+     * @param currency The currency for which the zero value is requested
+     * @return A {@code MonetaryValue} which represents a value of zero in the given currency
+     */
+    public static MonetaryValue zero(String currency) {
+        return new MonetaryValue(currency, BigDecimal.ZERO);
+    }
+
+    /**
+     * Parse a string in the format {@code EUR-100.00} as a {@code MonetaryValue}.
+     *
+     * @param ccyAmountType The string representation to parse
+     * @return A monetary value
+     * @throws NumberFormatException if the numeric part of {@code ccyAmountType} cannot be parsed as a
+     *                               {@link BigDecimal}
+     */
+    public static MonetaryValue parse(String ccyAmountType) {
+        return new MonetaryValue(
+                ccyAmountType.substring(0, CURRENCY_SIZE),
+                new BigDecimal(ccyAmountType.substring(CURRENCY_SIZE))
+        );
+    }
+
+    /**
+     * Serialize a {@code MonetaryValue} in the format {@code EUR-100.00}.
+     *
+     * @return A string representation of this {@code MonetaryValue}
+     */
+    public String serialize() {
+        return currency() + value();
+    }
+
+    /**
+     * Returns the signum function of this {@code MonetaryValue}.
+     *
+     * @return -1, 0, or 1 as the value of this {@code MonetaryValue} is negative, zero, or positive.
+     */
+    public int signum() {
+        return value.signum();
+    }
+
+    /**
+     * Checks if two instances of {@code MonetaryValue} represent the same value.
+     *
+     * @param other The {@code MonetaryValue} to compare with
+     * @return {@code true} if two instances of {@code MonetaryValue} represent the same value, {@code false} otherwise.
+     */
+    public boolean equals(MonetaryValue other) {
+        return currency.equals(other.currency) && value.compareTo(other.value) == 0;
+    }
+}

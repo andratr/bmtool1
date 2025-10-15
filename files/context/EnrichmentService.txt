@@ -1,0 +1,55 @@
+public interface ConsumerEnrichmentService {
+    BinaryIndicator getBinaryIndicator(String code);
+
+    Country getCountry(String countryCode);
+
+    CreditCommitmentIndicator getCreditCommitmentIndicator(String code);
+
+    Currency getCurrency(String code);
+
+    Default getDefault(String code);
+
+    DependentDefault getDependentDefault(String fieldName, String value);
+
+    DerecognitionReason getDerecognitionReason(String code);
+
+    EadModel getEadModel(String code);
+
+    Set<ExpectedFiles> getExpectedFiles(String sourceSystemId);
+
+    FacilityPurpose getFacilityPurpose(String code);
+
+    GeneralIndicator getGeneralIndicator(String code);
+
+    LoanStatus getLoanStatus(String code);
+
+    Mapping getMapping(String fieldName, String systemValue);
+
+    PociTp getPociTp(String code);
+
+    RepaymentScheduleType getRepaymentScheduleType(String code);
+
+    RiskRatingType getRiskRatingType(String code);
+
+    SourceSystem getSourceSystem(String sourceSystemId);
+
+    MonetaryValue convertToEuro(MonetaryValue monetaryValue);
+
+    List<RuleAssignment> getRuleAssignments(String processCode, String ruleCode);
+
+    List<FunctionalParameter> getFunctionalParameters(String code);
+
+    FlattenedTreeElement getLimitTypeTreeElement(String childCode, int levelParent);
+
+    FlattenedTreeElement getLimitTypeTreeElementLowestLevel(String childCode);
+
+    List<FlattenedTreeElement> getRiskRatingTreeElements(String childCode);
+
+    LimitType getLimitType(String code);
+
+    boolean isSecuritisationCodePresent(String securitisationCode);
+
+    boolean outstandingAmountTypePresent(String outstandingAmountType);
+
+    boolean outstandingAmountTypeSupported(String code);
+}

@@ -1,0 +1,99 @@
+import com.example.dq.foundation.data.MonetaryValue;
+import com.example.dq.foundation.data.OptionalDate;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.time.Duration;
+
+@Getter
+@Setter
+@ToString
+public final class Outstanding implements Sp4ConsumerEntity {
+
+    private static final BigDecimal MAX_PAST_DUE_AMT = BigDecimal.valueOf(999);
+
+    private Long pk;
+    private String localCustId;
+    private Customer cust;
+    private String higherLimitId;
+    private String limitId;
+    private Limit limit;
+    private MonetaryValue outstdngAmt;
+    private OptionalDate nextPayDt = OptionalDate.empty();
+    private Duration fixedIntPeriod;
+    private BigDecimal contractIntRate;
+    private OptionalDate nextIntResetDt = OptionalDate.empty();
+    private Duration repayFreq;
+    private Duration intPayFreq;
+    private MonetaryValue nextInstalAmt;
+    private Duration daysPastDue;
+    private MonetaryValue pastDueAmt;
+    private MonetaryValue principalPastDueAmt;
+    private MonetaryValue intPastDueAmt;
+    private MonetaryValue feesPastDueAmt;
+    private BigInteger paymentsOverdue;
+    private OptionalDate oldestArrearDt = OptionalDate.empty();
+    private MonetaryValue writeOffAmt;
+    private OptionalDate latestWriteOffDt = OptionalDate.empty();
+    private OptionalDate reportedInfectedDt = OptionalDate.empty();
+    private OptionalDate outstdngStartDt = OptionalDate.empty();
+    private OptionalDate outstdngEndDt = OptionalDate.empty();
+    private String baseEntity;
+    private String outstdngId;
+    private String dept;
+    private BigDecimal intCapRate;
+    private BigDecimal intFloorRate;
+    private String intRefRate;
+    private BigDecimal intMargin;
+    private OptionalDate firstRepayDt = OptionalDate.empty();
+    private MonetaryValue balloonRepayAmt;
+    private String repaySchedType;
+    private String ifrs9MeasCat;
+    private String ifrs9AcctClass;
+    private MonetaryValue cumWriteOffAmt;
+    private MonetaryValue addWriteOffAmt;
+    private BigInteger payReminders;
+    private String eadCalcId;
+    private String lgdCalcId;
+    private boolean generated = false;
+
+    public BigInteger getDefaultPaymentsOverdue() {
+        BigDecimal pda = pastDueAmt.value();
+        BigDecimal nia = nextInstalAmt.value();
+        BigDecimal result = pda.divide(nia, RoundingMode.CEILING);
+        if (result.compareTo(MAX_PAST_DUE_AMT) > 0) {
+            result = MAX_PAST_DUE_AMT;
+        }
+
+        return result.toBigInteger();
+    }
+
+    /**
+     * Return the number of days until the next interest payment or repayment.
+     * <p>
+     * If both the interest payment frequency and repayment frequency are missing, this method will return {@code null}.
+     * If only one of the fields is missing, the value of the other field is returned. If both fields are present, the
+     * smallest number of days until either of these is returned.
+     *
+     * @return The number of days until the next payment.
+     */
+    public Long getNumberOfDaysUntilNextPayment() {
+        if (intPayFreq == null) {
+            if (repayFreq == null) {
+                return 0L;
+            }
+
+            return repayFreq.toDays();
+        }
+
+        if (repayFreq == null) {
+            return intPayFreq.toDays();
+        }
+
+        return Long.min(intPayFreq.toDays(), repayFreq.toDays());
+    }
+}

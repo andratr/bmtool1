@@ -1,0 +1,72 @@
+import com.example.dq.foundation.events.DataQualityEvent;
+import com.example.dq.foundation.events.EntityDeletedEvent;
+import com.example.dq.foundation.events.EntityGeneratedEvent;
+import com.example.dq.foundation.events.ExceptionRaisedEvent;
+import com.example.dq.foundation.events.FieldModifiedEvent;
+
+import java.time.Instant;
+
+public interface EventService {
+    void processEvent(DataQualityEvent event);
+
+    /**
+     * When a data quality event is produced using one of the provided methods, the timestamp is determined using this
+     * method. The default behaviour is to use {@code Instant.now()}, but this can be overridden in for example tests,
+     * where one might prefer to use a static clock.
+     *
+     * @return An {@link Instant} which represents the timestamp on which the event was generated.
+     */
+    default Instant getDataQualityEventTimestamp() {
+        return Instant.now();
+    }
+
+    default <T> EntityDeletedEvent<T> createEntityDeletedEvent(
+            String exceptionCode,
+            T entity
+    ) {
+        return new EntityDeletedEvent<>(
+                exceptionCode,
+                entity,
+                getDataQualityEventTimestamp()
+        );
+    }
+
+    default <T, U> EntityGeneratedEvent<T, U> createEntityGeneratedEvent(
+            String exceptionCode,
+            U generatedFrom,
+            T generatedEntity
+    ) {
+        return new EntityGeneratedEvent<>(
+                exceptionCode,
+                generatedFrom,
+                generatedEntity,
+                getDataQualityEventTimestamp()
+        );
+    }
+
+    default <T> ExceptionRaisedEvent createExceptionRaisedEvent(
+            String exceptionCode,
+            T entity
+    ) {
+        return new ExceptionRaisedEvent(
+                exceptionCode,
+                entity,
+                getDataQualityEventTimestamp()
+        );
+    }
+
+    default <T, U> FieldModifiedEvent<T, U> createFieldModifiedEvent(
+            String exceptionCode,
+            T item,
+            U originalValue,
+            U defaultedValue
+    ) {
+        return new FieldModifiedEvent<>(
+                exceptionCode,
+                item,
+                originalValue,
+                defaultedValue,
+                getDataQualityEventTimestamp()
+        );
+    }
+}

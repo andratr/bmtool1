@@ -1,0 +1,20 @@
+import com.example.dq.foundation.data.MonetaryValue;
+import com.example.dq.foundation.data.OptionalDate;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+public final class CoverValue implements Sp4ConsumerEntity {
+    private String localCustId;
+    private String coverId;
+    private Cover cover;
+    private String higherLimitId;
+    private String limitId;
+    private String coverValType;
+    private MonetaryValue coverAmt;
+    private OptionalDate coverValDate = OptionalDate.empty();
+    private boolean generated = false;
+}

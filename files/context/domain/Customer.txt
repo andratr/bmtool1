@@ -1,0 +1,26 @@
+import com.example.dq.foundation.data.MonetaryValue;
+import com.example.dq.foundation.data.OptionalDate;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+public final class Customer implements Sp4ConsumerEntity {
+    private Long pk;
+    private String localCustId;
+    private OptionalDate dob = OptionalDate.empty();
+    private String custType;
+    private String custNationality;
+    private String countryOfResidence;
+    private MonetaryValue income;
+    private String incomeBase;
+    private String maritalStatus;
+    private String industry;
+    private String workAgreement;
+    private String educationLevel;
+    private String custSegment;
+    private String custPostalCode;
+    private boolean generated = false;
+}

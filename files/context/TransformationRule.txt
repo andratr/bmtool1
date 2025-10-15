@@ -1,0 +1,18 @@
+public interface TransformationRule<T, U extends DqContext> extends ExecutionBlock<T, U> {
+    default void execute(T item, U context) {
+        if (predicate(context).test(item)) {
+            DataQualityEvent event = transformation(context).apply(item);
+            context.getEventService().processEvent(event);
+        }
+    }
+
+    default Function<T, DataQualityEvent> exceptionRaisedEventTransformation(DqContext context) {
+        return entity -> context.getEventService().createExceptionRaisedEvent(eventCode(), entity);
+    }
+
+    Predicate<T> predicate(U context);
+
+    Function<T, DataQualityEvent> transformation(U context);
+
+    String eventCode();
+}

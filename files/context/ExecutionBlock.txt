@@ -1,0 +1,3 @@
+public interface ExecutionBlock<T, U extends DqContext> {
+    void execute(T item, U context);
+}

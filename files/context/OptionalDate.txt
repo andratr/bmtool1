@@ -1,0 +1,338 @@
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
+import java.time.temporal.TemporalUnit;
+
+public record OptionalDate(LocalDate localDate) implements Comparable<OptionalDate> {
+
+    /**
+     * Common instance for {@code maximum()}.
+     */
+    public static final OptionalDate MAX = new OptionalDate(LocalDate.MAX);
+    /**
+     * Common instance for {@code empty()}.
+     */
+    private static final OptionalDate EMPTY_OPTIONAL_DATE = new OptionalDate(null);
+
+    /**
+     * Returns an empty {@code OptionalDate} instance. No value is present for this {@code OptionalDate}.
+     *
+     * @return an empty {@code OptionalDate}
+     * @apiNote Though it may be tempting to do so, avoid testing if an object is empty by comparing with {@code ==} or
+     * {@code !=} against instances returned by {@code OptionalDate.empty()}. There is no guarantee that it is a
+     * singleton. Instead, use {@link #isEmpty()} or {@link #isPresent()}.
+     */
+    public static OptionalDate empty() {
+        return EMPTY_OPTIONAL_DATE;
+    }
+
+    /**
+     * Obtains an instance of {@code OptionalDate} from a text string such as {@code 2007-12-03}. Defers parsing to
+     * {@link LocalDate#parse(CharSequence)}. If the input is {@code null} or an empty string, an empty
+     * {@code OptionalDate} is returned.
+     *
+     * @param text the text to parse such as "2007-12-03", a null value or an empty string
+     * @return the parsed local date, not null
+     * @throws java.time.format.DateTimeParseException if the text cannot be parsed
+     */
+    public static OptionalDate parse(String text) {
+        return text == null || text.isEmpty() ? OptionalDate.empty() : new OptionalDate(LocalDate.parse(text));
+    }
+
+    /**
+     * Obtains an instance of {@code OptionalDate} from a year, month and day.
+     * <p>
+     * This returns a {@code OptionalDate} with the specified year, month and day-of-month.
+     * The day must be valid for the year and month, otherwise an exception will be thrown.
+     *
+     * @param year       the year to represent, from MIN_YEAR to MAX_YEAR
+     * @param month      the month-of-year to represent, from 1 (January) to 12 (December)
+     * @param dayOfMonth the day-of-month to represent, from 1 to 31
+     * @return the local date, not null
+     * @throws java.time.DateTimeException if the value of any field is out of range, or if the day-of-month is invalid
+     *                                     for the month-year
+     */
+    public static OptionalDate of(int year, int month, int dayOfMonth) {
+        return new OptionalDate(LocalDate.of(year, month, dayOfMonth));
+    }
+
+    /**
+     * If a value is  not present, returns {@code true}, otherwise {@code false}.
+     *
+     * @return {@code true} if a value is not present, otherwise {@code false}
+     */
+    public boolean isEmpty() {
+        return localDate == null;
+    }
+
+    /**
+     * If a value is present, returns {@code true}, otherwise {@code false}.
+     *
+     * @return {@code true} if a value is present, otherwise {@code false}
+     */
+    public boolean isPresent() {
+        return localDate != null;
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is before the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line before the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is before the specified date
+     */
+    public boolean isBefore(ChronoLocalDate other) {
+        return localDate != null && other != null && localDate.isBefore(other);
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is before the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line before the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null or empty, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is before the specified date
+     */
+    public boolean isBefore(OptionalDate other) {
+        return other != null && isBefore(other.localDate);
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is before or on the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line before or on the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is before or on the specified date
+     */
+    public boolean isBeforeOrEquals(ChronoLocalDate other) {
+        return localDate != null && other != null && (localDate.equals(other) || localDate.isBefore(other));
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is before or on the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line before or on the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null or empty, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is before or on the specified date
+     */
+    public boolean isBeforeOrEquals(OptionalDate other) {
+        return other != null && isBeforeOrEquals(other.localDate);
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is after the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line after the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is after the specified date
+     */
+    public boolean isAfter(ChronoLocalDate other) {
+        return localDate != null && other != null && localDate.isAfter(other);
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is after the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line after the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null or empty, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is after the specified date
+     */
+    public boolean isAfter(OptionalDate other) {
+        return other != null && isAfter(other.localDate);
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is after or on the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line after or on the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is after or on the specified date
+     */
+    public boolean isAfterOrEquals(ChronoLocalDate other) {
+        return localDate != null && other != null && (localDate.equals(other) || localDate.isAfter(other));
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is after or on the specified date.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line after or on the other date.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the specified date is null or empty, this method will always return
+     * {@code false}.
+     *
+     * @param other the other date to compare to
+     * @return true if this date is after or on the specified date
+     */
+    public boolean isAfterOrEquals(OptionalDate other) {
+        return other != null && isAfterOrEquals(other.localDate);
+    }
+
+    /**
+     * Checks if this date is equal to the specified date.
+     * <p>
+     * This checks to see if this date represents the same point on the local time-line as the other date.
+     *
+     * @param other the other date to compare to, not null
+     * @return true if this date is equal to the specified date
+     */
+    public boolean isEqual(OptionalDate other) {
+        if (localDate == null) {
+            return other == null || other.localDate == null;
+        } else if (other == null || other.localDate == null) {
+            return false;
+        }
+        return localDate.isEqual(other.localDate);
+    }
+
+    /**
+     * Create a new optional date that is {@code amountToAdd} {@code unit} later. If this optional date is empty,
+     * nothing happens.
+     *
+     * @param amountToAdd the amount of the unit to add to the result, may be negative
+     * @param unit        the unit of the amount to add, not null
+     * @return a {@code OptionalDate} based on this date with the specified amount added, not null, but may be empty
+     */
+    public OptionalDate plus(long amountToAdd, TemporalUnit unit) {
+        if (localDate == null) {
+            return this;
+        }
+        return new OptionalDate(localDate.plus(amountToAdd, unit));
+    }
+
+    /**
+     * Create a new optional date that is {@code amountToAdd} {@code unit} earlier. If this optional date is empty,
+     * nothing happens.
+     *
+     * @param amountToAdd the amount of the unit to subtract from the result, may be negative
+     * @param unit        the unit of the amount to subtract, not null
+     * @return a {@code OptionalDate} based on this date with the specified amount subtracted, not null, but may be
+     * empty
+     */
+    public OptionalDate minus(long amountToAdd, TemporalUnit unit) {
+        if (localDate == null) {
+            return this;
+        }
+        return new OptionalDate(localDate.minus(amountToAdd, unit));
+    }
+
+    /**
+     * Create a new optional date that is {@code daysToAdd} later. If this optional date is empty, nothing happens.
+     *
+     * @param daysToAdd the days to add, may be negative
+     * @return an {@code OptionalDate} based on this date with the days added, not null, but may be empty
+     */
+    public OptionalDate plusDays(long daysToAdd) {
+        if (localDate == null) {
+            return this;
+        }
+        return new OptionalDate(localDate.plusDays(daysToAdd));
+    }
+
+    /**
+     * Returns the latest of this optional date and another optional date. If both optional dates are empty, an empty
+     * optional date is returned. If one optional date is empty, the non-empty optional date is returned.
+     *
+     * @param other the optional date to compare this optional date with
+     * @return an {@code OptionalDate} which is the max of this and {@code other}, not null, but may be empty
+     */
+    public OptionalDate max(OptionalDate other) {
+        if (localDate == null) {
+            return other == null ? OptionalDate.empty() : other;
+        }
+        if (other == null || other.localDate == null || localDate.isAfter(other.localDate)) {
+            return this;
+        }
+        return other;
+    }
+
+    /**
+     * Returns the earliest of this optional date and another optional date. If both optional dates are empty, an empty
+     * optional date is returned. If one optional date is empty, the non-empty optional date is returned.
+     *
+     * @param other the optional date to compare this optional date with
+     * @return an {@code OptionalDate} which is the min of this and {@code other}, not null, but may be empty
+     */
+    public OptionalDate min(OptionalDate other) {
+        if (localDate == null) {
+            return other == null ? OptionalDate.empty() : other;
+        }
+        if (other == null || other.localDate == null || localDate.isBefore(other.localDate)) {
+            return this;
+        }
+        return other;
+    }
+
+    /**
+     * Checks if this {@code OptionalDate} is in between the specified fromDate and untilDate.
+     * <p>
+     * This checks to see if this date represents a point on the local time-line after or on the fromDate
+     * and before or on the untilDate. If the untilDate is null, it will only check if it is after or on the fromDate.
+     * <p>
+     * If this {@code OptionalDate} is empty, or if the fromDate is null, this method will always return {@code false}.
+     *
+     * @param fromDate  the start date to compare to, not null
+     * @param untilDate the end date to compare to, may be null
+     * @return true if this date is in between the specified dates
+     */
+    public boolean isBetween(OptionalDate fromDate, OptionalDate untilDate) {
+        if (fromDate == null || !isPresent()) {
+            return false;
+        }
+        boolean afterOrEqualsFromDate = isAfterOrEquals(fromDate);
+        boolean beforeOrEqualsUntilDate = untilDate == null || untilDate.isEmpty() || isBeforeOrEquals(untilDate);
+        return afterOrEqualsFromDate && beforeOrEqualsUntilDate;
+    }
+
+    /**
+     * Converts an {@code OptionalDate} into an SQL {@code Date}.
+     *
+     * @return {@code null} if the {@code OptionalDate} if empty, an SQL {@code Date} otherwise
+     */
+    public Date toSqlDate() {
+        if (isEmpty()) {
+            return null;
+        }
+        return Date.valueOf(localDate());
+    }
+
+    @Override
+    public int compareTo(OptionalDate other) {
+        if (this.isEmpty() && other.isEmpty()) {
+            return 0;
+        }
+        if (other.isEmpty()) {
+            return 1;
+        }
+        if (this.isEmpty()) {
+            return -1;
+        }
+        return this.localDate.compareTo(other.localDate);
+    }
+}
