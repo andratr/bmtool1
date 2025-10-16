@@ -5,15 +5,6 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-
-![Dashboard – Welcome Page](product_screenshots/1.png)
-![Dashboard – Why?](product_screenshots/2.png)
-![Dashboard – AI](product_screenshots/3.png)
-![Dashboard – Ingest New Files](product_screenshots/4.png)
-![Dashboard – Experiments](product_screenshots/5.png)
-![Dashboard – Analytics(soon)]()
-
-
 This tool aims to make it easier to benchmark different code translation AI techniques. It compares different approaches:
 * Prompt engineering
 * Code Chunking
@@ -39,6 +30,17 @@ Keep experiments reproducible by keeping track of your previous tracks.
 * [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge\&logo=nginx\&logoColor=white)](https://nginx.org/)
 * [![Weaviate](https://img.shields.io/badge/Weaviate-20B2AA?style=for-the-badge)](https://weaviate.io/)
 * [![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge)](https://ollama.com/)
+
+
+## Screenshots
+
+![Dashboard – Welcome Page](product_screenshots/1.png)
+![Dashboard – Why?](product_screenshots/2.png)
+![Dashboard – AI](product_screenshots/3.png)
+![Dashboard – Ingest New Files](product_screenshots/4.png)
+![Dashboard – Experiments](product_screenshots/5.png)
+![Dashboard – Analytics(soon)]()
+
 
 
 ## Getting Started
