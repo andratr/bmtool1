@@ -57,10 +57,10 @@ public class IngestPairsUseCase {
 
         for (var p : pairs) {
             Path plsqlPath = Path.of(p.plsqlPath());
-            Path javaPath  = Path.of(p.javaPath());
+            Path javaPath = Path.of(p.javaPath());
 
             List<Block> plsqlBlocks = plsqlExtractor.extract(plsqlPath);
-            List<Block> javaBlocks  = javaExtractor.extract(javaPath);
+            List<Block> javaBlocks = javaExtractor.extract(javaPath);
 
             var mappings = blockMapper.map(plsqlBlocks, javaBlocks);
 

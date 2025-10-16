@@ -25,11 +25,9 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-
             "assets": [
               "src/assets"
             ],
-
             "styles": [
               "src/styles.scss"
             ],
@@ -61,6 +59,9 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
@@ -83,12 +84,10 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-
             "assets": [
               "src/assets",
               "src/favicon.ico"
             ],
-
             "styles": [
               "src/styles.scss"
             ],

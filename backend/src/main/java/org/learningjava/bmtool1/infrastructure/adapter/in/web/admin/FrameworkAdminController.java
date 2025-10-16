@@ -11,29 +11,31 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin/framework")
+@RequestMapping("/framework")
 public class FrameworkAdminController {
-
-    private final FrameworkIngestionUseCase useCase;
-    private final JobRegistry jobs;
 
     // Allow-list for framework uploads (PDFs explicitly rejected below)
     private static final Set<String> ALLOWED_EXT = Set.of(
             "java", "kt", "xml", "properties", "txt", "md", "json", "yaml", "yml"
     );
+    private final FrameworkIngestionUseCase useCase;
+    private final JobRegistry jobs;
 
     public FrameworkAdminController(FrameworkIngestionUseCase useCase, JobRegistry jobs) {
         this.useCase = useCase;
         this.jobs = jobs;
     }
 
-    /** Existing path-based ingest */
+    /**
+     * Existing path-based ingest
+     */
     @PostMapping("/ingest")
     public Map<String, Object> ingest(@RequestParam("pkg") List<String> pkgs) {
         if (pkgs == null || pkgs.isEmpty()) {
@@ -56,7 +58,9 @@ public class FrameworkAdminController {
         return Map.of("jobId", jobId);
     }
 
-    /** New: browser folder upload → temp dir → discover packages → ingest */
+    /**
+     * New: browser folder upload → temp dir → discover packages → ingest
+     */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> uploadFramework(@RequestParam("files") List<MultipartFile> files) throws IOException {
         if (files == null || files.isEmpty()) {
@@ -90,7 +94,10 @@ public class FrameworkAdminController {
             } catch (Exception e) {
                 jobs.fail(jobId, e.getMessage());
             } finally {
-                try { deleteRecursively(tempDir); } catch (Exception ignored) {}
+                try {
+                    deleteRecursively(tempDir);
+                } catch (Exception ignored) {
+                }
             }
         });
 
@@ -103,7 +110,9 @@ public class FrameworkAdminController {
     }
 
     @GetMapping("/ping")
-    public String ping() { return "PIIING!"; }
+    public String ping() {
+        return "PIIING!";
+    }
 
     // ---------- helpers ----------
 
@@ -137,7 +146,9 @@ public class FrameworkAdminController {
         }
     }
 
-    /** Persist uploaded files under tempDir, preserving subfolders from original filename (webkitRelativePath). */
+    /**
+     * Persist uploaded files under tempDir, preserving subfolders from original filename (webkitRelativePath).
+     */
     private void saveUploadedFiles(List<MultipartFile> files, Path tempDir) throws IOException {
         for (MultipartFile file : files) {
             String rel = file.getOriginalFilename();
@@ -151,7 +162,9 @@ public class FrameworkAdminController {
         }
     }
 
-    /** Extract distinct Java/Kotlin package names from uploaded sources. */
+    /**
+     * Extract distinct Java/Kotlin package names from uploaded sources.
+     */
     private Set<String> discoverPackages(Path root) throws IOException {
         final Set<String> pkgs = new HashSet<>();
 
@@ -172,7 +185,9 @@ public class FrameworkAdminController {
         return pkgs;
     }
 
-    /** Read the first 'package ...;' line from a source file (fast scan). */
+    /**
+     * Read the first 'package ...;' line from a source file (fast scan).
+     */
     private String readFirstPackageDecl(Path source) {
         try (var in = Files.newInputStream(source);
              var r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
@@ -189,16 +204,22 @@ public class FrameworkAdminController {
                     return decl.trim();
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         return null;
     }
 
-    /** Recursive delete helper. */
+    /**
+     * Recursive delete helper.
+     */
     private void deleteRecursively(Path dir) throws IOException {
         if (!Files.exists(dir)) return;
         try (var walk = Files.walk(dir)) {
             walk.sorted(Comparator.reverseOrder()).forEach(p -> {
-                try { Files.deleteIfExists(p); } catch (IOException ignored) {}
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                }
             });
         }
     }

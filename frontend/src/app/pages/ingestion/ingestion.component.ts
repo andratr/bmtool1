@@ -120,13 +120,13 @@ export class IngestionComponent implements OnDestroy {
 
         if (this.ragFileCount > 0) {
             uploads.push(
-                this.uploadDir('/api/admin/rag/upload', this.ragFiles, 'RAG', this.ragFolderName, this.ragFileCount)
+                this.uploadDir('/api/rag/upload', this.ragFiles, 'RAG', this.ragFolderName, this.ragFileCount)
                     .catch(err => this.notifyUploadFailure('RAG', err))
             );
         }
         if (this.frameworkFileCount > 0) {
             uploads.push(
-                this.uploadDir('/api/admin/framework/upload', this.frameworkFiles, 'FRAMEWORK', this.frameworkFolderName, this.frameworkFileCount)
+                this.uploadDir('/api/framework/upload', this.frameworkFiles, 'FRAMEWORK', this.frameworkFolderName, this.frameworkFileCount)
                     .catch(err => this.notifyUploadFailure('FRAMEWORK', err))
             );
         }
@@ -218,7 +218,7 @@ export class IngestionComponent implements OnDestroy {
         this.jobFeed = [initial, ...this.jobFeed];
 
         const sub = interval(1000).subscribe(() => {
-            const path = type === 'RAG' ? `/api/admin/rag/jobs/${jobId}` : `/api/admin/framework/jobs/${jobId}`;
+            const path = type === 'RAG' ? `/rag/jobs/${jobId}` : `/framework/jobs/${jobId}`;
             this.http.get<JobStatus>(path).subscribe({
                 next: (status) => {
                     this.updateJob(status);

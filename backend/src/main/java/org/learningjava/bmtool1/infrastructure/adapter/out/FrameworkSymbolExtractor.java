@@ -4,7 +4,9 @@ import org.learningjava.bmtool1.domain.model.FrameworkSymbol;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -100,12 +102,12 @@ public class FrameworkSymbolExtractor {
     private String signatureOf(Method m) {
         String mods = Modifier.isStatic(m.getModifiers()) ? "static " : "";
         return mods + simple(m.getReturnType()) + " " + m.getName() +
-                "(" + Arrays.stream(m.getParameterTypes()).map(this::simple).reduce((x,y)->x+", "+y).orElse("") + ")";
+                "(" + Arrays.stream(m.getParameterTypes()).map(this::simple).reduce((x, y) -> x + ", " + y).orElse("") + ")";
     }
 
     private String signatureOf(Constructor<?> c) {
         String name = c.getDeclaringClass().getSimpleName();
-        return name + "(" + Arrays.stream(c.getParameterTypes()).map(this::simple).reduce((x,y)->x+", "+y).orElse("") + ")";
+        return name + "(" + Arrays.stream(c.getParameterTypes()).map(this::simple).reduce((x, y) -> x + ", " + y).orElse("") + ")";
     }
 
     private String simple(Class<?> t) {
@@ -127,7 +129,7 @@ public class FrameworkSymbolExtractor {
         if (m.getName().equals("signum")) {
             return "if (x.signum() >= 0) { /* ... */ }";
         }
-        if (kind.equals("dto") && m.getName().startsWith("set") && m.getParameterCount()==1) {
+        if (kind.equals("dto") && m.getName().startsWith("set") && m.getParameterCount() == 1) {
             String field = Character.toLowerCase(m.getName().charAt(3)) + m.getName().substring(4);
             return "var d = new " + cls + "();\nd." + m.getName() + "(" + placeholder(m.getParameterTypes()[0]) + ");";
         }
@@ -138,7 +140,7 @@ public class FrameworkSymbolExtractor {
     private String snippetFor(Class<?> clazz, Constructor<?> c, String kind) {
         String cls = clazz.getSimpleName();
         if (kind.equals("value-object") || kind.equals("dto")) {
-            String args = Arrays.stream(c.getParameterTypes()).map(this::placeholder).reduce((x,y)->x+", "+y).orElse("");
+            String args = Arrays.stream(c.getParameterTypes()).map(this::placeholder).reduce((x, y) -> x + ", " + y).orElse("");
             return "var d = new " + cls + "(" + args + ");";
         }
         return "var x = new " + cls + "();";
@@ -170,7 +172,8 @@ public class FrameworkSymbolExtractor {
                         classes.addAll(findInJar(url, pkg));
                     }
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
         return classes;
     }
@@ -182,7 +185,10 @@ public class FrameworkSymbolExtractor {
             if (f.isDirectory()) out.addAll(findInDirectory(f, pkg + "." + f.getName()));
             else if (f.getName().endsWith(".class") && !f.getName().contains("$")) {
                 String name = pkg + '.' + f.getName().substring(0, f.getName().length() - 6);
-                try { out.add(Class.forName(name)); } catch (Throwable ignored) {}
+                try {
+                    out.add(Class.forName(name));
+                } catch (Throwable ignored) {
+                }
             }
         }
         return out;
@@ -199,10 +205,14 @@ public class FrameworkSymbolExtractor {
                 String name = e.getName();
                 if (name.endsWith(".class") && name.startsWith(pkgPath) && !name.contains("$")) {
                     String cls = name.replace('/', '.').substring(0, name.length() - 6);
-                    try { out.add(Class.forName(cls)); } catch (Throwable ignored) {}
+                    try {
+                        out.add(Class.forName(cls));
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         return out;
     }
 }

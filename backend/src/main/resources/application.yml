@@ -1,25 +1,31 @@
 spring:
   config:
-    import: "optional:file:/app/config/app.env.properties"
+    import:
+      - optional:file:/app/config/app.env.properties
+      - optional:configtree:../secrets/
   application:
     name: bmtool1
+  datasource:
+    url: jdbc:postgresql://db:${POSTGRES_PORT:5432}/bmtool
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 1
 
 server:
-  port: ${BACKEND_PORT}
+  port: ${BACKEND_PORT:1000}
   error:
     include-message: always
     include-binding-errors: always
 
-
 bmtool1:
   weaviate:
-    url: http://weaviate:${WEAVIATE_PORT}
+    url: http://weaviate:${WEAVIATE_PORT:8080}
     className: ${WEAVIATE_CLASS_NAME:PairChunk}
   ollama:
-    url: http://ollama:${OLLAMA_PORT}
-    embeddingModel: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text} #default model #todo: delete this
+    url: http://ollama:${OLLAMA_PORT:11434}
+    embeddingModel: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text}
   openrouter:
-    apiKey: ${OPENROUTER_API_KEY}
+    apiKey: ${openrouter_api_key:}
 
 management:
   endpoints:
@@ -35,11 +41,6 @@ logging:
   level:
     org.learningjava.bmtool1: ${APP_LOG_LEVEL:DEBUG}
 
-#todo
 ingest:
   on-replace: ${INGEST_ON_REPLACE:true}
   rootDir: ${INGEST_ROOT_DIR:/app/data/pairs}
-
-
-#todo automatic restart not working
-

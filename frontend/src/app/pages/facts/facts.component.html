@@ -1,6 +1,6 @@
 <div class="containerr">
   <!-- 🔥 Carousel Title -->
-  <div class="carousel-title">Why is software migration valuable?</div>
+  <div class="carousel-title">Why is software migration important?</div>
 
   <div class="container"
        [style.width.px]="containerSize"
@@ -8,11 +8,17 @@
        [style.left.px]="offsetX"
        [style.top.px]="offsetY">
     <div class="wrapper">
-      <svg [attr.viewBox]="'0 0 ' + containerSize + ' ' + containerSize"
-           [attr.width]="containerSize"
-           [attr.height]="containerSize">
-        <circle [attr.cx]="center" [attr.cy]="center" [attr.r]="radius" class="wheel"></circle>
-      </svg>
+        <!-- replace the <circle> with an <ellipse> -->
+        <svg [attr.viewBox]="'0 0 ' + containerSize + ' ' + containerSize"
+             [attr.width]="containerSize"
+             [attr.height]="containerSize">
+            <ellipse [attr.cx]="center"
+                     [attr.cy]="center"
+                     [attr.rx]="radius"
+                     [attr.ry]="radius * vertScale"
+                     class="wheel"></ellipse>
+        </svg>
+
 
       <!-- 🔥 Cards -->
       <div *ngFor="let slide of slides; let i = index"
@@ -31,8 +37,21 @@
   </div>
 
   <!-- 🔥 Controls -->
-  <div class="controls">
-    <button (click)="prev()">‹</button>
-    <button (click)="next()">›</button>
-  </div>
+    <div class="controls">
+        <button class="prev" (click)="prev()" aria-label="Previous">
+  <span class="icon-rotator rotate-180">
+    <img src="assets/icons/carousel_arrow.svg" class="icon" alt="">
+  </span>
+        </button>
+
+        <button class="next" (click)="next()" aria-label="Next">
+  <span class="icon-rotator rotate-0">
+    <img src="assets/icons/carousel_arrow.svg" class="icon" alt="">
+  </span>
+        </button>
+
+    </div>
+
+
+
 </div>

@@ -32,12 +32,12 @@ class IngestPairsUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        pairReader     = mock(PairReaderPort.class);
+        pairReader = mock(PairReaderPort.class);
         plsqlExtractor = mock(BlockExtractorPort.class);
-        javaExtractor  = mock(BlockExtractorPort.class);
-        store          = mock(VectorStorePort.class);
-        embedding      = mock(EmbeddingPort.class);
-        mapper         = mock(BlockMapper.class);
+        javaExtractor = mock(BlockExtractorPort.class);
+        store = mock(VectorStorePort.class);
+        embedding = mock(EmbeddingPort.class);
+        mapper = mock(BlockMapper.class);
 
         useCase = new IngestPairsUseCase(
                 pairReader, plsqlExtractor, javaExtractor, mapper, store, embedding
@@ -48,10 +48,10 @@ class IngestPairsUseCaseTest {
     void ingests_pairs_and_upserts_when_mappings_exist() throws Exception {
         // Arrange
         when(pairReader.discoverPairs("root"))
-                .thenReturn(List.of(new SourcePair(new PairId("id-1"),"a.sql", "A.java")));
+                .thenReturn(List.of(new SourcePair(new PairId("id-1"), "a.sql", "A.java")));
 
         var plsqlBlock = new Block("INSERT_STATEMENT", "INSERT INTO T ...", "a.sql");
-        var javaBlock  = new Block("METHOD", "void transformation(){}", "A.java");
+        var javaBlock = new Block("METHOD", "void transformation(){}", "A.java");
 
         when(plsqlExtractor.extract(Path.of("a.sql"))).thenReturn(List.of(plsqlBlock));
         when(javaExtractor.extract(Path.of("A.java"))).thenReturn(List.of(javaBlock));
@@ -88,7 +88,7 @@ class IngestPairsUseCaseTest {
     @Test
     void does_not_call_store_when_no_mappings_found() throws Exception {
         when(pairReader.discoverPairs("root"))
-                .thenReturn(List.of(new SourcePair(new PairId("id-1"),"a.sql", "A.java")));
+                .thenReturn(List.of(new SourcePair(new PairId("id-1"), "a.sql", "A.java")));
 
         when(plsqlExtractor.extract(Path.of("a.sql"))).thenReturn(List.of());
         when(javaExtractor.extract(Path.of("A.java"))).thenReturn(List.of());
@@ -103,7 +103,7 @@ class IngestPairsUseCaseTest {
     @Test
     void propagates_extractor_exception() throws Exception {
         when(pairReader.discoverPairs("root"))
-                .thenReturn(List.of(new SourcePair(new PairId("id-1"),"a.sql", "A.java")));
+                .thenReturn(List.of(new SourcePair(new PairId("id-1"), "a.sql", "A.java")));
 
         when(plsqlExtractor.extract(Path.of("a.sql")))
                 .thenThrow(new RuntimeException("parser boom"));
@@ -115,8 +115,8 @@ class IngestPairsUseCaseTest {
     @Test
     void embeds_once_per_mapping() throws Exception {
         when(pairReader.discoverPairs("root"))
-                .thenReturn(List.of(new SourcePair(new PairId("id-1"),"a.sql", "A.java"),
-                        new SourcePair(new PairId("id-2"),"b.sql", "B.java")));
+                .thenReturn(List.of(new SourcePair(new PairId("id-1"), "a.sql", "A.java"),
+                        new SourcePair(new PairId("id-2"), "b.sql", "B.java")));
 
         var p1 = new Block("INSERT_STATEMENT", "P1", "a.sql");
         var j1 = new Block("METHOD", "J1", "A.java");

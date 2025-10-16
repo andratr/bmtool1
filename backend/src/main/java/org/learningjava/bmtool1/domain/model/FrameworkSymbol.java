@@ -10,4 +10,5 @@ public record FrameworkSymbol(
         String snippet,            // e.g. 'var m = MonetaryValue.parse("EUR-100.00");'
         String kind,               // "value-object" | "dto" | "service" | "context"
         java.util.List<String> tags // e.g. ["money","parse","value-object"]
-) {}
+) {
+}

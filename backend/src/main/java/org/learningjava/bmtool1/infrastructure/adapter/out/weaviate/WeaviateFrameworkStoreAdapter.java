@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
 import okhttp3.*;
 import org.learningjava.bmtool1.application.port.FrameworkStorePort;
 import org.learningjava.bmtool1.domain.model.FrameworkSymbol;
@@ -30,6 +31,12 @@ public class WeaviateFrameworkStoreAdapter implements FrameworkStorePort {
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.apiKey = apiKey;
         this.className = className;
+    }
+
+
+    @PostConstruct
+    public void init() {
+        ensureSchema();
     }
 
     // ---------- PORT IMPLEMENTATION ----------
@@ -267,5 +274,7 @@ public class WeaviateFrameworkStoreAdapter implements FrameworkStorePort {
         }
     }
 
-    private String orEmpty(String s) { return s == null ? "" : s; }
+    private String orEmpty(String s) {
+        return s == null ? "" : s;
+    }
 }

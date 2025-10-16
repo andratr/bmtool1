@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// src/main/java/.../in/web/admin/JobRegistry.java
 @Component
 public class JobRegistry {
-    public static record JobStatus(String id, String type, String state, String message, int processed, int total) {}
     private final Map<String, JobStatus> jobs = new ConcurrentHashMap<>();
 
     public String start(String type, int total) {
@@ -17,14 +15,23 @@ public class JobRegistry {
         jobs.put(id, new JobStatus(id, type, "RUNNING", "Started", 0, total));
         return id;
     }
+
     public void update(String id, int processed, String message) {
         jobs.compute(id, (k, j) -> new JobStatus(id, j.type(), "RUNNING", message, processed, j.total()));
     }
+
     public void done(String id, String message) {
         jobs.compute(id, (k, j) -> new JobStatus(id, j.type(), "DONE", message, j.total(), j.total()));
     }
+
     public void fail(String id, String message) {
         jobs.compute(id, (k, j) -> new JobStatus(id, j.type(), "FAILED", message, j.processed(), j.total()));
     }
-    public JobStatus get(String id) { return jobs.get(id); }
+
+    public JobStatus get(String id) {
+        return jobs.get(id);
+    }
+
+    public record JobStatus(String id, String type, String state, String message, int processed, int total) {
+    }
 }

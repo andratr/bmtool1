@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface FrameworkStorePort {
     void ensureSchema();  // ensures FrameworkSnippet schema
+
     void upsertSymbols(List<FrameworkSymbol> symbols, List<float[]> vectors);
+
     List<FrameworkSymbol> retrieve(String query, float[] queryVec, int k, List<String> mustHaveTags);
 }

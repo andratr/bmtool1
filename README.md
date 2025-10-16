@@ -11,7 +11,7 @@ This tool aims to make it easier to benchmark different code translation AI tech
 * Different LLMs
 * LLMs costs
 
-Due to the AI field's rapid evolution, a hexagonal architecture was used, which aims to make it easier to plug more techniques, as well as reach any desired state of scalability.
+Due to the AI field's rapid evolution, a hexagonal architecture was used, which aims to make it easier to plug more techniques, as well as overall maintainability.
 
 ## Why this exists
 
@@ -52,8 +52,8 @@ git clone https://github.com/andratr/bmtool1
 cd bmtool1
 
 # 2) Build images
-docker compose --profile dev  build
-docker compose --profile prod build
+docker compose --profile dev up --build   
+docker compose --profile prod up --build   
 ```
 
 
@@ -69,7 +69,7 @@ Start:
 
 ```sh
 
-docker compose --profile dev up -d --build backend-dev frontend-dev
+docker compose --profile dev up -d --build   
 ```
 
 Logs:
@@ -101,7 +101,13 @@ curl -i http://localhost:8085/api/query/ping
 curl -i http://localhost:8089/query/ping
 
 # open UI
-open http://localhost:8085
+open http://localhost:8080
+```
+Restart all services:
+
+```sh
+docker compose --profile dev down             
+docker compose --profile dev up -d 
 ```
 
 Restart a single service:
@@ -109,6 +115,13 @@ Restart a single service:
 ```sh
 docker compose --profile prod up -d --build frontend   # changed Angular/nginx.conf
 docker compose --profile prod up -d --build backend    # changed backend
+```
+
+Debug Springboot:
+
+```sh
+docker compose up -d backend-dev              
+docker compose logs -f backend-dev
 ```
 
 

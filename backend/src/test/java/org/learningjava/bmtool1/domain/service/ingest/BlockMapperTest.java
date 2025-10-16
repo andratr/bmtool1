@@ -5,7 +5,7 @@ import org.learningjava.bmtool1.domain.model.Block;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class BlockMapperTest {
 
@@ -22,10 +22,10 @@ class BlockMapperTest {
         var java = List.of(new Block(
                 "METHOD",
                 """
-                public class X {
-                  String eventCode() { return "E123"; }
-                }
-                """,
+                        public class X {
+                          String eventCode() { return "E123"; }
+                        }
+                        """,
                 "X.java"
         ));
 
@@ -46,8 +46,8 @@ class BlockMapperTest {
         var java = List.of(new Block(
                 "METHOD",
                 """
-                public boolean predicate(Object x) { return x != null; }
-                """,
+                        public boolean predicate(Object x) { return x != null; }
+                        """,
                 "Y.java"
         ));
 
@@ -68,8 +68,8 @@ class BlockMapperTest {
         var java = List.of(new Block(
                 "METHOD",
                 """
-                public void transformation() { /* insert logic */ }
-                """,
+                        public void transformation() { /* insert logic */ }
+                        """,
                 "Z.java"
         ));
 

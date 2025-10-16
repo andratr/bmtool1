@@ -1,3 +1,15 @@
+
+# -------------------- SECRETS --------------------
+secrets:
+  openrouter_api_key:
+    file: ./secrets/openrouter_api_key
+  postgres_password:
+    file: ./secrets/postgres_password
+  app_db_password:
+    file: ./secrets/spring.datasource.password
+  app_db_username:
+    file: ./secrets/spring.datasource.username
+
 services:
   # -------------------- FRONTEND (PROD) --------------------
   frontend-prod:
@@ -12,7 +24,6 @@ services:
     profiles: [ "prod" ]
     env_file:
       - .env
-      - .env.secrets
 
   # -------------------- FRONTEND (DEV) ---------------------
   frontend-dev:
@@ -23,16 +34,12 @@ services:
       args:
         FRONTEND_PORT: ${FRONTEND_PORT}
     environment:
-      # show deprecation stack and all warnings
       NODE_OPTIONS: "--trace-deprecation --trace-warnings"
-      # verbose vite & http-proxy logs
       DEBUG: "vite:*,http-proxy*"
-      # make sure these exist for the proxy:
       BACKEND_SERVICE: "backend-dev"
       BACKEND_PORT: "${BACKEND_PORT}"
       FRONTEND_PORT: "${FRONTEND_PORT}"
-
-    command: sh -lc "npm run start -- --host 0.0.0.0 --port ${FRONTEND_PORT}"
+    command: sh -lc "npm run start"
     ports:
       - "${FRONTEND_HOST_PORT}:${FRONTEND_PORT}"
     volumes:
@@ -41,8 +48,6 @@ services:
     profiles: [ "dev" ]
     env_file:
       - .env
-      - .env.secrets
-
 
   # -------------------- BACKEND (PROD) ---------------------
   backend:
@@ -55,13 +60,21 @@ services:
       OLLAMA_BASE_URL: "http://ollama:${OLLAMA_PORT}"
       WEAVIATE_URL: "http://weaviate:${WEAVIATE_PORT}"
       OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
-
       SCHEMA_SYNC_ENABLED: "true"
       WEAVIATE_CLASS_NAME: "PairChunk"
       INGEST_ON_REPLACE: "true"
       INGEST_ROOT_DIR: "/app/data/pairs"
+      # Let Spring read username/password directly from secrets via configtree
+      SPRING_CONFIG_IMPORT: "optional:configtree:/run/secrets/"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/bmtool"
+    secrets:
+      - source: openrouter_api_key
+        target: openrouter_api_key
+      - source: app_db_username
+        target: spring.datasource.username
+      - source: app_db_password
+        target: spring.datasource.password
     volumes:
-      - ./secrets:/run/secrets:ro
       - ./files/anon-pairs:/app/data/pairs
       - ../.env:/app/config/app.env.properties:ro
     expose:
@@ -72,15 +85,14 @@ services:
       ollama:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP"]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP" ]
       interval: 10s
       timeout: 3s
       retries: 10
     restart: unless-stopped
-    profiles: ["prod"]
+    profiles: [ "prod" ]
     env_file:
       - .env
-      - .env.secrets
 
   # -------------------- BACKEND (DEV / live reload) --------
   backend-dev:
@@ -89,45 +101,49 @@ services:
       dockerfile: Dockerfile
       target: dev
     working_dir: /app
+    command: mvn -DskipTests spring-boot:run
     environment:
       SERVER_PORT: "${BACKEND_PORT}"
       OLLAMA_BASE_URL: "http://ollama:${OLLAMA_PORT}"
       WEAVIATE_URL: "http://weaviate:${WEAVIATE_PORT}"
       OPENROUTER_API_KEY_FILE: "/run/secrets/openrouter_api_key"
-
       SCHEMA_SYNC_ENABLED: "true"
       WEAVIATE_CLASS_NAME: "PairChunk"
       INGEST_ON_REPLACE: "true"
       INGEST_ROOT_DIR: "/app/data/pairs"
-
       SPRING_PROFILES_ACTIVE: "dev"
       JAVA_TOOL_OPTIONS: "-Dspring.devtools.restart.enabled=true"
+      # Spring reads DB creds from /run/secrets
+      SPRING_CONFIG_IMPORT: "optional:configtree:/run/secrets/"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/bmtool"
+    ports:
+      - "${BACKEND_HOST_DEV_PORT}:${BACKEND_PORT}"
+    secrets:
+      - source: openrouter_api_key
+        target: openrouter_api_key
+      - source: app_db_username
+        target: spring.datasource.username
+      - source: app_db_password
+        target: spring.datasource.password
     volumes:
       - ./backend:/app
-      - ./secrets:/run/secrets:ro
       - ./files/anon-pairs:/app/data/pairs
-      - ~/.m2:/root/.m2 # cache maven repo for speed
-      - ../.env:/app/config/app.env.properties:ro #todo: remove this, here and in prod
-
-    entrypoint: ["mvn"]
-    command: ["spring-boot:run"]
-    ports:
-      - "${BACKEND_HOST_DEV_PORT}:${BACKEND_PORT}"   # dev only
+      - ~/.m2:/root/.m2
+      - ../.env:/app/config/app.env.properties:ro
     depends_on:
       weaviate:
         condition: service_healthy
       ollama:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP || exit 1"]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/actuator/health | grep -q UP || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 30
     restart: unless-stopped
-    profiles: ["dev"]
+    profiles: [ "dev" ]
     env_file:
       - .env
-      - .env.secrets
 
   # -------------------- WEAVIATE ----------------------------
   weaviate:
@@ -152,21 +168,37 @@ services:
       timeout: 5s
       retries: 20
 
-
   # -------------------- OLLAMA ------------------------------
   ollama:
     build: ./ollama
     expose:
-      - "${OLLAMA_PORT}"                              # internal only
+      - "${OLLAMA_PORT}"
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      test: [ "CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 30
 
+  # -------------------- POSTGRESQL -------------------------
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: bmtool
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    # Map host port to container's 5432; default host port is 5432 if not set
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    secrets:
+      - source: postgres_password
+        target: postgres_password
+
 volumes:
   weaviate_data: {}
   ollama_data: {}
+  pgdata: {}

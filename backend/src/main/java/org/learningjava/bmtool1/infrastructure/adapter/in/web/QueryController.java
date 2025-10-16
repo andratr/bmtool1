@@ -23,18 +23,30 @@ public class QueryController {
 
     @PostMapping
     public QueryResponse ask(@RequestBody QueryRequest req) {
+        // fallback if old clients don’t send embeddingModel
+        String embeddingModel = (req.embeddingModel() == null || req.embeddingModel().isBlank())
+                ? " nomic-embed-text"
+                : req.embeddingModel();
+
         Answer answer = queryRag.ask(
                 new Query(req.question()),
                 req.k(),
                 req.provider(),
-                req.model()
+                req.model(),
+                embeddingModel
         );
 
         return new QueryResponse(answer.text(), answer.retrievalResults());
     }
 
     // ---------- DTOs ----------
-    public record QueryRequest(String question, int k, String provider, String model) {
+    public record QueryRequest(
+            String question,
+            int k,
+            String provider,
+            String model,
+            String embeddingModel // NEW//todo
+    ) {
     }
 
     public record QueryResponse(String text, List<RetrievalResult> citations) {

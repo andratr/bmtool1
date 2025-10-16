@@ -16,14 +16,13 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/admin/rag")
+@RequestMapping("/rag")
 public class RagAdminController {
-
-    private final IngestPairsUseCase ingest;
-    private final JobRegistry jobs;
 
     // Only types that can form SQL–Java pairs
     private static final Set<String> ALLOWED_EXT = Set.of("sql", "plsql", "pkb", "pks", "java");
+    private final IngestPairsUseCase ingest;
+    private final JobRegistry jobs;
 
     public RagAdminController(IngestPairsUseCase ingest, JobRegistry jobs) {
         this.ingest = ingest;
@@ -75,7 +74,10 @@ public class RagAdminController {
             } catch (Exception e) {
                 jobs.fail(jobId, e.getMessage());
             } finally {
-                try { deleteRecursively(tempDir); } catch (Exception ignored) {}
+                try {
+                    deleteRecursively(tempDir);
+                } catch (Exception ignored) {
+                }
             }
         });
 
@@ -118,7 +120,9 @@ public class RagAdminController {
         }
     }
 
-    /** Persist uploaded files under tempDir, preserving subfolders from original filename (webkitRelativePath). */
+    /**
+     * Persist uploaded files under tempDir, preserving subfolders from original filename (webkitRelativePath).
+     */
     private void saveUploadedFiles(List<MultipartFile> files, Path tempDir) throws IOException {
         for (MultipartFile file : files) {
             String rel = file.getOriginalFilename();
@@ -132,12 +136,17 @@ public class RagAdminController {
         }
     }
 
-    /** Simple recursive deletion of a directory tree. */
+    /**
+     * Simple recursive deletion of a directory tree.
+     */
     private void deleteRecursively(Path dir) throws IOException {
         if (!Files.exists(dir)) return;
         try (var walk = Files.walk(dir)) {
             walk.sorted((a, b) -> b.compareTo(a)).forEach(p -> {
-                try { Files.deleteIfExists(p); } catch (IOException ignored) {}
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                }
             });
         }
     }

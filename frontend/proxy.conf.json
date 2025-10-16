@@ -1,8 +1,11 @@
 {
   "/api": {
-    "target": "http://backend-dev:${BACKEND_PORT}",
+    "target": "http://backend-dev:1000",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug"
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": ""
+    }
   }
 }

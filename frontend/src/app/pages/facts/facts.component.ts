@@ -8,54 +8,47 @@ import { CommonModule } from '@angular/common';
   templateUrl: './facts.component.html',
   styleUrls: ['./facts.component.css']
 })
-export class FactsComponent {
-  slides = [
-    {
-      title: 'Slide 1',
-      text: 'This is the first slide description.',
-      image: 'https://picsum.photos/200/120?random=1'
-    },
-    {
-      title: 'Slide 2',
-      text: 'Here is another card with some info.',
-      image: 'https://picsum.photos/200/120?random=2'
-    },
-    {
-      title: 'Slide 3',
-      text: 'More content for the carousel!',
-      image: 'https://picsum.photos/200/120?random=3'
-    },
-    {
-      title: 'Slide 4',
-      text: 'Last one in the sample list.',
-      image: 'https://picsum.photos/200/120?random=4'
-    },
-    {
-      title: 'Slide 5',
-      text: 'Another slide goes here.',
-      image: 'https://picsum.photos/200/120?random=5'
-    },
-    {
-      title: 'Slide 6',
-      text: 'Keep spinning through the wheel.',
-      image: 'https://picsum.photos/200/120?random=6'
-    },
-    {
-      title: 'Slide 7',
-      text: 'Almost at the end!',
-      image: 'https://picsum.photos/200/120?random=7'
-    },
-    {
-      title: 'Slide 8',
-      text: 'Final slide in the set.',
-      image: 'https://picsum.photos/200/120?random=8'
-    }
-  ];
 
-  // 🔥 wheel setup
-  containerSize = 1200;
-  offsetX = 1000;
-  offsetY = -200;
+
+export class FactsComponent {
+    slides = [
+        {
+            title: 'Data integrity first',
+            text: 'Data mapping and quality are the top migration risks. Failures are prevented with early schema mapping, encoding checks, cleansing, and strict validations.',
+            image: 'assets/images/markus-winkler-kA7zREkzrBw-unsplash.jpg'
+        },
+        {
+            title: 'Downtime is optional',
+            text: 'You can keep the system available by preparing the new version in parallel, moving users over gradually, and handing the database over in a planned step. This approach avoids one large shutdown.',
+            image: 'assets/images/john-cardamone-3IUgJsPVDTI-unsplash.jpg'
+        },
+        {
+            title: 'Dependencies drive complexity',
+            text: 'Hidden integrations, such as cron jobs, third-party APIs, SSO, webhooks, often break first. Inventory them, set contract tests, and use test doubles where needed.',
+            image: 'assets/images/growtika-ZfVyuV8l7WU-unsplash.jpg'
+        },
+        {
+            title: 'Parallel runs de-risk go-live',
+            text: 'Operate legacy and target systems side-by-side. Reconcile totals and event counts, enforce error budgets, and only cut over when results match.',
+            image: 'assets/images/cova-software-yGg45DgysfQ-unsplash.jpg'
+        },
+        {
+            title: 'Beyond lift-and-shift; set your cloud foundation',
+            text: 'Migration spans data, apps, integrations, infra, and people/process—and lays groundwork for cloud: IaC, CI/CD, observability, security baselines, and FinOps.',
+            image: 'assets/images/roy-wen-4HsgSS2Tq_4-unsplash.jpg'
+        },
+        {
+            title: 'Legacy COBOL still matters',
+            text: 'Significant core workloads in finance and the public sector remain on COBOL/mainframes; appropriate migration strategies include interface encapsulation, selective replatforming, and incremental replacement, rather than rewriting everything at once.',
+            image: 'assets/images/daniel-de-nadai-7LePkqSqgEA-unsplash.jpg'
+        }
+    ];
+
+
+// 🔥 wheel setup
+  containerSize = 1600;
+  offsetX = 870;
+  offsetY = -400;
 
   get center(): number {
     return this.containerSize / 2;
@@ -66,14 +59,18 @@ export class FactsComponent {
 
   angleStep = 360 / this.slides.length;
   currentRotation = 180; // start with slide 1 at left
+   vertScale = 0.9; // 10% flatter vertically
 
-  getPosition(index: number) {
-    const angle = -(index * this.angleStep + this.currentRotation) * (Math.PI / 180);
-    return {
-      x: this.center + this.radius * Math.cos(angle) - 400, // half of width (800/2)
-      y: this.center + this.radius * Math.sin(angle) - 150  // half of height (300/2)
-    };
-  }
+    getPosition(index: number) {
+        const angle = (index * this.angleStep + this.currentRotation) * (Math.PI / 180);
+        return {
+            x: this.center + this.radius * Math.cos(angle),
+            y: this.center + (this.radius * this.vertScale) * Math.sin(angle) // ← scaled Y
+        };
+    }
+
+
+
 
   /** 🔥 detect active index (leftmost, ~180°) */
   get activeIndex(): number {

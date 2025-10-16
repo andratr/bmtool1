@@ -104,8 +104,9 @@
 .card-title {
   font-size: 20px;
   font-weight: bold;
-  margin: 0 0 8px 0;
+  margin: 0 0 13px 0;
   color: #333;
+  line-height: 1.1;
 }
 
 .card-text {
@@ -140,17 +141,32 @@
 }
 
 .controls button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 50%;
-  background: #333;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s ease;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #893;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.controls button:hover { background: #6C7A28; }
+
+.icon-rotator {
+    display: inline-block;       /* so transform applies */
+    line-height: 0;
+    transform-origin: 50% 50%;
+
 }
 
-.controls button:hover {
-  background: #555;
-}
+/* rotation helpers */
+.rotate-0   { transform: translateX(-2px) rotate(45deg) scaleY(-1);}
+.rotate-60  { transform: rotate(60deg); }
+.rotate-180 { transform: translateX(2px) rotate(135deg ); }
+.rotate--180{ transform: rotate(-180deg); }

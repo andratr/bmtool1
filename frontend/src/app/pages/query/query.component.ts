@@ -69,7 +69,7 @@ export class QueryComponent implements OnInit {
     this.result = undefined;
     this.error = undefined;
 
-    this.http.post<QueryResponse>(`api/query`, {
+    this.http.post<QueryResponse>(`/api/query`, {
       question: this.question,
       k: this.k,
       provider: this.selectedProvider.id,
