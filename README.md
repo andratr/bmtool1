@@ -5,6 +5,15 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
+
+![Dashboard – Welcome Page](product_screenshots/1.png)
+![Dashboard – Why?](product_screenshots/2.png)
+![Dashboard – AI](product_screenshots/3.png)
+![Dashboard – Ingest New Files](product_screenshots/4.png)
+![Dashboard – Experiments](product_screenshots/5.png)
+![Dashboard – Analytics(soon)]()
+
+
 This tool aims to make it easier to benchmark different code translation AI techniques. It compares different approaches:
 * Prompt engineering
 * Code Chunking
