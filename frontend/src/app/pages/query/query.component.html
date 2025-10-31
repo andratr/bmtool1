@@ -1,68 +1,128 @@
 <div class="mycontent">
+    <div class="query-container">
+        <h2 class="title">💡 Ask the AI Assistant your PLSQL question:</h2>
 
-<div class="query-container">
-  <h2 class="title">💡 Ask the AI Assistant your PLSQL question: </h2>
+        <!-- Question -->
+        <textarea
+                [(ngModel)]="question"
+                placeholder="Type your question..."
+                class="input question-input"
+        ></textarea>
 
-  <!-- Question textarea -->
-  <textarea
-    [(ngModel)]="question"
-    placeholder="Type your question..."
-    class="input question-input"
-  ></textarea>
+        <!-- Row 1: kDocs, kFramework, Provider -->
+        <div class="options-row top-row">
+            <label class="knn-label">kDocs:</label>
+            <input type="number" [(ngModel)]="kDocs" min="1" class="input number-input"/>
 
-  <!-- Options row -->
-  <div class="options-row">
-    <label class="knn-label">K-nearest matches:</label>
-    <input type="number" [(ngModel)]="k" min="1" class="input number-input" />
+            <label class="knn-label">kFramework:</label>
+            <input type="number" [(ngModel)]="kFramework" min="1" class="input number-input"/>
 
-    <select [(ngModel)]="selectedProvider" (ngModelChange)="onProviderChange($event)" class="input select">
-      <option *ngFor="let p of providers" [ngValue]="p">
-        {{ p.label }}
-      </option>
-    </select>
+            <!-- Provider -->
+            <select class="input select" [(ngModel)]="selectedProviderId" (ngModelChange)="onProviderChange($event)" name="provider">
+                <option *ngFor="let p of providers" [value]="p.id">{{ p.label }}</option>
+            </select>
+        </div>
 
-    <select [(ngModel)]="selectedModel" class="input select">
-      <option *ngFor="let m of selectedProvider?.models" [ngValue]="m">
-        {{ m.label }}
-      </option>
-    </select>
+        <!-- Row 2: Model, Prompting, Embedding, Ask (right) -->
+        <div class="options-row bottom-row">
+            <!-- Model -->
+            <select class="input select" [(ngModel)]="selectedModelId" name="model">
+                <option *ngFor="let m of selectedProvider?.models" [value]="m.id">{{ m.label }} — {{ m.id }}</option>
+            </select>
 
-    <!-- Dummy prompting techniques -->
-    <select class="input select">
-      <option>Default Prompting</option>
-      <option>Chain-of-Thought</option>
-      <option>Few-Shot</option>
-      <option>Zero-Shot</option>
-    </select>
+            <!-- Prompting technique (always visible; uses fallback then backend) -->
+            <select class="input select" [(ngModel)]="selectedPrompting" name="prompting" title="Prompting technique">
+                <option *ngFor="let t of promptingOptions" [value]="t">{{ t }}</option>
+            </select>
 
-    <button (click)="ask()" class="btn">Ask</button>
-  </div>
+            <!-- Embedding model -->
+            <input
+                    class="input embed-input"
+                    type="text"
+                    [(ngModel)]="embeddingModel"
+                    placeholder="embedding model (e.g., nomic-embed-text:latest)"
+            />
 
-  <!-- States -->
-  <div *ngIf="loading" class="status loading">⏳ Thinking…</div>
-  <div *ngIf="error" class="status error">❌ {{ error }}</div>
+            <!-- Push Ask to the far right -->
+            <div class="flex-spacer"></div>
+            <button (click)="ask()" class="btn ask-btn">Askk</button>
+        </div>
 
-  <!-- Result -->
-  <div *ngIf="result" class="result">
-    <h3 class="answer-title">✅ Answer</h3>
-    <div class="answer">{{ result!.text }}</div>
+        <!-- Answer format -->
+        <div class="format-row">
+            <label class="format-label">Answer format:</label>
+            <select class="input select small" [(ngModel)]="answerFormat">
+                <option value="plain">Plain</option>
+                <option value="code">Coding style</option>
+            </select>
+            <button *ngIf="result?.text" class="btn btn-secondary" (click)="copyAnswer()" [disabled]="copying">
+                {{ copying ? 'Copied!' : 'Copy' }}
+            </button>
+        </div>
 
-    <!-- Citations -->
-    <div *ngIf="result?.citations?.length" class="citations-section">
-      <h4>📚 Citations</h4>
-      <ul class="citations">
-        <li *ngFor="let c of result!.citations" class="citation">
-          <div><strong>Pair ID:</strong> {{ c.mapping.pairId }}</div>
-          <div>
-            <strong>PL/SQL Type:</strong> {{ c.mapping.plsqlType }} |
-            <strong>Java Type:</strong> {{ c.mapping.javaType }} |
-            <strong>Score:</strong> {{ c.score | number:'1.2-2' }}
-          </div>
-          <pre class="snippet"><strong>PL/SQL:</strong> {{ c.mapping.plsqlSnippet }}</pre>
-          <pre class="snippet"><strong>Java:</strong> {{ c.mapping.javaSnippet }}</pre>
-        </li>
-      </ul>
+        <!-- States -->
+        <div *ngIf="loading" class="status loading">⏳ Thinking…</div>
+        <div *ngIf="error" class="status error">❌ {{ error }}</div>
+
+        <!-- Result -->
+        <div *ngIf="result" class="result">
+            <h3 class="answer-title">✅ Answer</h3>
+
+            <!-- Coding style default -->
+            <pre *ngIf="answerFormat === 'code'; else plainAns" class="answer code-block"><code>{{ result!.text }}</code></pre>
+            <ng-template #plainAns>
+                <div class="answer">{{ result!.text }}</div>
+            </ng-template>
+
+            <!-- Citations (docs/code chunks) -->
+            <div *ngIf="result?.citations?.length" class="citations-section">
+                <h4>📚 Citations</h4>
+                <ul class="citations">
+                    <li *ngFor="let c of result!.citations" class="citation">
+                        <div><strong>Pair ID:</strong> {{ c.mapping.pairId }}</div>
+                        <div>
+                            <strong>PL/SQL Type:</strong> {{ c.mapping.plsqlType }} |
+                            <strong>Java Type:</strong> {{ c.mapping.javaType }} |
+                            <strong>Score:</strong> {{ c.score | number:'1.2-2' }}
+                        </div>
+                        <pre class="snippet"><strong>PL/SQL:</strong> {{ c.mapping.plsqlSnippet }}</pre>
+                        <pre class="snippet"><strong>Java:</strong> {{ c.mapping.javaSnippet }}</pre>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Domain Models (framework symbols) AFTER doc citations -->
+            <!-- Domain Models (framework symbols) AFTER doc citations -->
+            <div *ngIf="result?.framework?.length" class="citations-section">
+                <h4>🏷️ Domain Models</h4>
+                <ul class="citations">
+                    <li *ngFor="let f of result!.framework" class="citation">
+                        <!-- Guard symbol existence once, then use 's' safely -->
+                        <ng-container *ngIf="f.symbol as s">
+                            <div>
+                                <strong>{{ s.className }}#{{ s.symbol }}</strong>
+                                <span *ngIf="s.kind"> ({{ s.kind }})</span>
+                                <span> — Score: {{ f.score | number:'1.2-2' }}</span>
+                            </div>
+
+                            <div *ngIf="s.methodSignature">
+                                <strong>Signature:</strong> {{ s.methodSignature }}
+                            </div>
+
+                            <div *ngIf="s.tags?.length">
+                                <strong>Tags:</strong> {{ s.tags!.join(', ') }}
+                            </div>
+
+                            <pre *ngIf="s.snippet" class="snippet">
+<strong>Snippet:</strong> {{ s.snippet }}
+        </pre>
+                        </ng-container>
+                        <!-- Optional: handle missing symbol -->
+                        <div *ngIf="!f.symbol"><em>(no symbol details available)</em></div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
     </div>
-  </div>
-</div>
 </div>

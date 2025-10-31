@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
 import okhttp3.*;
 import org.learningjava.bmtool1.application.port.FrameworkStorePort;
-import org.learningjava.bmtool1.domain.model.FrameworkSymbol;
+import org.learningjava.bmtool1.domain.model.framework.FrameworkSymbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +25,13 @@ public class WeaviateFrameworkStoreAdapter implements FrameworkStorePort {
 
     private final String baseUrl;     // e.g. http://localhost:8080
     private final String apiKey;      // optional
-    private final String className;   // "FrameworkSnippet"
+    private final String className;   // e.g. "FrameworkSnippet"
 
     public WeaviateFrameworkStoreAdapter(String baseUrl, String apiKey, String className) {
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.apiKey = apiKey;
         this.className = className;
     }
-
 
     @PostConstruct
     public void init() {
@@ -61,6 +60,10 @@ public class WeaviateFrameworkStoreAdapter implements FrameworkStorePort {
 
     @Override
     public void upsertSymbols(List<FrameworkSymbol> symbols, List<float[]> vectors) {
+        if (symbols == null || symbols.isEmpty()) {
+            log.info("No framework symbols to upsert — skipping batch to avoid 422.");
+            return;
+        }
         if (symbols.size() != vectors.size()) {
             throw new IllegalArgumentException("symbols and vectors must have same size");
         }
@@ -130,7 +133,6 @@ public class WeaviateFrameworkStoreAdapter implements FrameworkStorePort {
 
         String where = "";
         if (tags != null && !tags.isEmpty()) {
-            // where: { path:["tags"], operator:ContainsAny, valueTextArray:[...]}
             String values = String.join("\",\"", tags);
             where = """
                     where: {

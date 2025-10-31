@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.application.port;
 
-import org.learningjava.bmtool1.domain.model.FrameworkSymbol;
+import org.learningjava.bmtool1.domain.model.framework.FrameworkSymbol;
 
 import java.util.List;
 

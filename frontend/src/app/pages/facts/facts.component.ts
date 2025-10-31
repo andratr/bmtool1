@@ -59,13 +59,12 @@ export class FactsComponent {
 
   angleStep = 360 / this.slides.length;
   currentRotation = 180; // start with slide 1 at left
-   vertScale = 0.9; // 10% flatter vertically
 
     getPosition(index: number) {
         const angle = (index * this.angleStep + this.currentRotation) * (Math.PI / 180);
         return {
             x: this.center + this.radius * Math.cos(angle),
-            y: this.center + (this.radius * this.vertScale) * Math.sin(angle) // ← scaled Y
+            y: this.center + (this.radius) * Math.sin(angle) // ← scaled Y
         };
     }
 

@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.learningjava.bmtool1.application.port.BlockExtractorPort;
-import org.learningjava.bmtool1.domain.model.Block;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

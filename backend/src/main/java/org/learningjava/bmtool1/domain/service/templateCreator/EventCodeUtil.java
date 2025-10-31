@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.domain.service.templateCreator;
 
-import org.learningjava.bmtool1.domain.model.Block;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
 
 import java.util.LinkedHashSet;
 import java.util.List;

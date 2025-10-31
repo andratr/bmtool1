@@ -44,3 +44,16 @@ logging:
 ingest:
   on-replace: ${INGEST_ON_REPLACE:true}
   rootDir: ${INGEST_ROOT_DIR:/app/data/pairs}
+
+
+carbon:
+  grid-kg-per-kwh: 0.22     # 2025, NL Alliander Half Year Report
+  pue: 1.15
+  local-avg-watts: 220
+  wh-per-ktkn:
+    default: 2.0
+    llama: 1.4
+    gpt: 3.0
+    # "openrouter:gpt-4o-mini": 3.2
+    # "ollama:llama3.1:8b-instruct-q4_K_M": 1.3
+

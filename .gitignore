@@ -1,12 +1,16 @@
-# === Back End (Java/Maven)
-target/
-.mvn/
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Back End
+**/target/
 
 # Secrets
-secrets/
+/secrets/*
+!/secrets/*.example
+!/secrets/README.md
+!/secrets/.gitkeep
+.env
+.env.local
+.env.*.local
 .env.secrets
+
 
 # === IDEs & Editors
 # IntelliJ IDEA

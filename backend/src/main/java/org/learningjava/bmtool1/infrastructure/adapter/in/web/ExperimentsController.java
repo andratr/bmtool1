@@ -2,7 +2,7 @@
 package org.learningjava.bmtool1.infrastructure.adapter.in.web;
 
 import org.learningjava.bmtool1.application.port.ExperimentStorePort;
-import org.learningjava.bmtool1.domain.model.Experiment;
+import org.learningjava.bmtool1.domain.model.analytics.Experiment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

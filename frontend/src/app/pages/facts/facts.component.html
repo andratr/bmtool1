@@ -15,7 +15,7 @@
             <ellipse [attr.cx]="center"
                      [attr.cy]="center"
                      [attr.rx]="radius"
-                     [attr.ry]="radius * vertScale"
+                     [attr.ry]="radius"
                      class="wheel"></ellipse>
         </svg>
 
@@ -36,10 +36,10 @@
     </div>
   </div>
 
-  <!-- 🔥 Controls -->
+  <!-- Controls -->
     <div class="controls">
         <button class="prev" (click)="prev()" aria-label="Previous">
-  <span class="icon-rotator rotate-180">
+  <span class="icon-rotator rotate--180">
     <img src="assets/icons/carousel_arrow.svg" class="icon" alt="">
   </span>
         </button>

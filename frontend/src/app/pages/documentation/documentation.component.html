@@ -1,0 +1,127 @@
+<section class="mycontent">
+    <h2>How we estimate CO₂</h2>
+
+    <p>
+        This project tracks an <strong>estimated carbon footprint</strong> for each query.
+    </p>
+
+    <figure style="margin: 1rem 0; padding: 1rem; border: 1px dashed #ccc; border-radius: 12px; text-align: center;">
+        <img src="assets/images/forest.png" alt="inputs → energy → CO₂" style="max-width: 100%; height: auto;" />
+    </figure>
+
+    <h3>Method</h3>
+    <ol>
+        <li><strong>Measure runtime</strong>: record end-to-end latency for the chat call (ms).</li>
+        <li><strong>Account for work done</strong>: read prompt &amp; completion token counts (when available).</li>
+        <li><strong>Apply a model/provider profile</strong>: assumed power draw and/or energy per token, plus a data-center <abbr title="Power Usage Effectiveness">PUE</abbr>.</li>
+        <li><strong>Apply a grid emissions factor</strong>: convert kWh → grams CO₂e using a configurable grams-per-kWh figure.</li>
+    </ol>
+
+    <details>
+        <summary><strong>Formula (conceptual)</strong></summary>
+        <pre><code>Energy_kWh  ≈  (Power_Watts × Time_seconds / 3600) × PUE
+              + (Tokens × EnergyPerToken_Wh / 1000) × PUE
+
+CO2_grams   =  Energy_kWh × GridFactor_g_per_kWh</code></pre>
+        <ul>
+            <li>If only tokens are exposed, we lean more on the <em>per-token energy</em> term.</li>
+            <li>If token counts are missing, we fall back to a <em>time × power</em> estimate.</li>
+            <li>All factors are conservative and <strong>configurable</strong>.</li>
+        </ul>
+        <p><em>Implementation:</em> see <code>CarbonEstimator</code> (package <code>domain.service.co2</code>). Tweak constants there (PUE, grid factor, per-model power/energy).</p>
+    </details>
+
+    <h3>Inputs we use</h3>
+    <ul>
+        <li><strong>Latency (ms)</strong>: measured per request.</li>
+        <li><strong>Tokens (prompt/completion)</strong>: when available (nullable-safe).</li>
+        <li><strong>Provider ID + Model</strong>: selects the profile (GPU class, PUE, per-token energy).</li>
+        <li><strong>Config constants</strong>: PUE, grid factor, per-token energy, fallback power draw.</li>
+    </ul>
+
+    <h3>Defaults &amp; assumptions (editable)</h3>
+    <ul>
+        <li><strong>PUE</strong>: ~1.2</li>
+        <li><strong>Grid emissions factor</strong>: ~400 g CO₂e/kWh (global-average placeholder)</li>
+        <li><strong>Energy per token / power draw</strong>: model-specific heuristics in <code>CarbonEstimator</code></li>
+    </ul>
+    <p><strong>Note:</strong> These are rough estimates—useful for <em>comparisons and trends</em>, not precise lifecycle accounting.</p>
+
+    <hr />
+
+    <h2>What does X grams of CO₂ mean?</h2>
+    <p>To make the number tangible, here are rough equivalences. Real values vary by country, vehicle, tree species, etc.</p>
+
+    <h3>Trees 🌳</h3>
+    <p>A commonly used heuristic: one mature tree absorbs about <strong>≈ 22,000 g (22 kg) CO₂ per year</strong>.</p>
+    <pre><code>Trees_needed_to_offset_for_1_year = CO2_grams / 22,000</code></pre>
+    <ul>
+        <li>11 g CO₂ → ≈ <code>0.0005</code> trees/year (about 4–5 hours of one tree’s annual uptake)</li>
+        <li>2,200 g (2.2 kg) CO₂ → ≈ <code>0.10</code> trees/year</li>
+        <li>22,000 g (22 kg) CO₂ → ≈ <code>1.0</code> tree/year</li>
+    </ul>
+    <p class="note" style="color:#666;">Use this as a <em>scale</em> indicator, not a literal “plant this many trees” prescription.</p>
+
+    <h3>Other quick equivalences</h3>
+    <ul>
+        <li><strong>Driving a petrol car</strong>: ~120 g CO₂ per km → <code>km ≈ CO2_grams / 120</code></li>
+        <li><strong>Short-haul air travel</strong>: ~150 g CO₂ per passenger-km → <code>km ≈ CO2_grams / 150</code></li>
+        <li><strong>Smartphone charges</strong>: ~5–8 g CO₂ per full charge → <code>charges ≈ CO2_grams / 6</code> (midpoint)</li>
+    </ul>
+    <p>You can swap in local factors if you know them (e.g., your grid is 200 g/kWh, or your car is 95 g/km).</p>
+
+    <hr />
+
+    <h2>Make it your own</h2>
+    <ul>
+        <li><strong>Tune the constants</strong> in <code>CarbonEstimator</code>:
+            <ul>
+                <li><code>GRID_G_PER_KWH</code></li>
+                <li><code>DEFAULT_PUE</code></li>
+                <li>Model/provider <em>power</em> or <em>energy-per-token</em> values</li>
+            </ul>
+        </li>
+        <li><strong>Show equivalents in the UI</strong> (optional helpers):
+            <ul>
+                <li>Trees: <code>trees = gramsCO2 / 22000</code></li>
+                <li>Car km: <code>km = gramsCO2 / 120</code></li>
+                <li>Phone charges: <code>charges = gramsCO2 / 6</code></li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Why keep CO₂ at all?</h3>
+    <ul>
+        <li>Compare <strong>cost–latency–emissions</strong> trade-offs across models and prompting techniques.</li>
+        <li>Spot regressions: a prompt/model change that doubles emissions per answer is worth a second look—especially at scale.</li>
+        <li>Track improvements as providers and hardware get more efficient.</li>
+    </ul>
+
+
+    <!-- Optional live equivalents panel -->
+    <div class="equiv-grid" *ngIf="gramsCO2 as g">
+        <div class="equiv-card">
+            <div class="label">Measured CO₂</div>
+            <div class="value">{{ format(g) }} g</div>
+        </div>
+        <div class="equiv-card">
+            <div class="label">Trees (1 year)</div>
+            <div class="value">{{ format(treesNeeded, 4) }}</div>
+        </div>
+        <div class="equiv-card">
+            <div class="label">Car distance</div>
+            <div class="value">{{ format(carKm) }} km</div>
+        </div>
+        <div class="equiv-card">
+            <div class="label">Flight distance</div>
+            <div class="value">{{ format(airKm) }} km</div>
+        </div>
+        <div class="equiv-card">
+            <div class="label">Phone charges</div>
+            <div class="value">{{ format(phoneCharges) }}</div>
+        </div>
+    </div>
+
+
+
+</section>

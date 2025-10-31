@@ -2,7 +2,7 @@ package org.learningjava.bmtool1.infrastructure.adapter.out.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.learningjava.bmtool1.application.port.SnippetRepository;
-import org.learningjava.bmtool1.domain.model.PlsqlSnippet;
+import org.learningjava.bmtool1.domain.model.pairs.PlsqlSnippet;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

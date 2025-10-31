@@ -1,6 +1,9 @@
 package org.learningjava.bmtool1.infrastructure.adapter.in.web.admin;
 
 import org.learningjava.bmtool1.application.usecase.IngestPairsUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -13,70 +16,107 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @RestController
 @RequestMapping("/rag")
 public class RagAdminController {
 
+    private static final Logger log = LoggerFactory.getLogger(RagAdminController.class);
+
     // Only types that can form SQL–Java pairs
     private static final Set<String> ALLOWED_EXT = Set.of("sql", "plsql", "pkb", "pks", "java");
+
     private final IngestPairsUseCase ingest;
     private final JobRegistry jobs;
+    private final Executor executor;
 
-    public RagAdminController(IngestPairsUseCase ingest, JobRegistry jobs) {
+    public RagAdminController(IngestPairsUseCase ingest,
+                              JobRegistry jobs,
+                              @Qualifier("applicationTaskExecutor") Executor executor) {
         this.ingest = ingest;
         this.jobs = jobs;
+        this.executor = executor;
     }
 
-    // --- Existing: ingest by server directory path
+    // --- Ingest by server/container directory path
     @PostMapping("/ingest")
     public Map<String, Object> ingestDirectory(@RequestParam String rootDir) {
         String jobId = jobs.start("RAG", 0);
-        CompletableFuture.runAsync(() -> {
+
+        if (rootDir == null || rootDir.isBlank()) {
+            jobs.fail(jobId, "rootDir is blank");
+            return Map.of("jobId", jobId);
+        }
+        Path dir = Path.of(rootDir);
+        if (!Files.isDirectory(dir)) {
+            jobs.fail(jobId, "Directory not found: " + rootDir);
+            return Map.of("jobId", jobId);
+        }
+
+        jobs.update(jobId, 0, "Scanning: " + rootDir);
+
+        executor.execute(() -> {
             try {
+                log.info("[{}] Ingest start: {}", jobId, rootDir);
                 var mappings = ingest.ingestDirectory(rootDir);
-                if (mappings == null || mappings.isEmpty()) {
+
+                int count = (mappings == null) ? 0 : mappings.size();
+                if (count == 0) {
                     jobs.fail(jobId, "No SQL–Java pairs found in " + rootDir);
+                    log.warn("[{}] No pairs found in {}", jobId, rootDir);
                 } else {
-                    jobs.done(jobId, "Ingested " + mappings.size() + " mappings");
+                    jobs.done(jobId, "Ingested " + count + " mappings");
+                    log.info("[{}] Ingest done: {} mappings", jobId, count);
                 }
             } catch (Exception e) {
                 jobs.fail(jobId, e.getMessage());
+                log.error("[{}] Ingest failed: {}", jobId, e.toString(), e);
             }
         });
+
         return Map.of("jobId", jobId);
     }
 
-    // --- New: browser folder upload → temp dir → ingest
+    // --- Browser folder upload → temp dir → ingest
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Map<String, Object> uploadAndIngest(@RequestParam("files") List<MultipartFile> files) throws IOException {
+    public Map<String, Object> uploadAndIngest(
+            @RequestParam(value = "files", required = false) List<MultipartFile> files) throws IOException {
+
         if (files == null || files.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No files provided");
         }
 
-        // Validate set and require at least one PL/SQL and one Java file
         validateFiles(files);
 
         Path tempDir = Files.createTempDirectory("rag-upload-");
         saveUploadedFiles(files, tempDir);
 
         String jobId = jobs.start("RAG", files.size());
-        CompletableFuture.runAsync(() -> {
+        jobs.update(jobId, 0, "Uploaded " + files.size() + " files; ingesting…");
+
+        executor.execute(() -> {
             try {
+                log.info("[{}] Upload ingest start: {}", jobId, tempDir);
                 var mappings = ingest.ingestDirectory(tempDir.toString());
 
-                if (mappings == null || mappings.isEmpty()) {
+                int count = (mappings == null) ? 0 : mappings.size();
+                if (count == 0) {
                     jobs.fail(jobId, "No SQL–Java pairs found in upload");
+                    log.warn("[{}] No pairs from upload {}", jobId, tempDir);
                 } else {
-                    jobs.done(jobId, "Ingested " + mappings.size() + " mappings");
+                    jobs.done(jobId, "Ingested " + count + " mappings");
+                    log.info("[{}] Upload ingest done: {} mappings", jobId, count);
                 }
             } catch (Exception e) {
                 jobs.fail(jobId, e.getMessage());
+                log.error("[{}] Upload ingest failed: {}", jobId, e.toString(), e);
             } finally {
                 try {
                     deleteRecursively(tempDir);
-                } catch (Exception ignored) {
+                    log.info("[{}] Cleaned {}", jobId, tempDir);
+                } catch (Exception cleanup) {
+                    log.warn("[{}] Cleanup failed for {}: {}", jobId, tempDir, cleanup.toString());
                 }
             }
         });
@@ -102,9 +142,6 @@ public class RagAdminController {
             String lower = name.toLowerCase();
             String ext = lower.contains(".") ? lower.substring(lower.lastIndexOf('.') + 1) : "";
 
-            if ("pdf".equals(ext)) {
-                throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "PDFs are not allowed: " + name);
-            }
             if (!ALLOWED_EXT.contains(ext)) {
                 throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
                         "File type not allowed: " + name);
@@ -120,9 +157,6 @@ public class RagAdminController {
         }
     }
 
-    /**
-     * Persist uploaded files under tempDir, preserving subfolders from original filename (webkitRelativePath).
-     */
     private void saveUploadedFiles(List<MultipartFile> files, Path tempDir) throws IOException {
         for (MultipartFile file : files) {
             String rel = file.getOriginalFilename();
@@ -136,17 +170,11 @@ public class RagAdminController {
         }
     }
 
-    /**
-     * Simple recursive deletion of a directory tree.
-     */
     private void deleteRecursively(Path dir) throws IOException {
         if (!Files.exists(dir)) return;
         try (var walk = Files.walk(dir)) {
             walk.sorted((a, b) -> b.compareTo(a)).forEach(p -> {
-                try {
-                    Files.deleteIfExists(p);
-                } catch (IOException ignored) {
-                }
+                try { Files.deleteIfExists(p); } catch (IOException ignored) {}
             });
         }
     }

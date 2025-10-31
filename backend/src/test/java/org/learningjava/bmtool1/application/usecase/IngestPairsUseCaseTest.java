@@ -6,10 +6,10 @@ import org.learningjava.bmtool1.application.port.BlockExtractorPort;
 import org.learningjava.bmtool1.application.port.EmbeddingPort;
 import org.learningjava.bmtool1.application.port.PairReaderPort;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
-import org.learningjava.bmtool1.domain.model.Block;
-import org.learningjava.bmtool1.domain.model.BlockMapping;
-import org.learningjava.bmtool1.domain.model.PairId;
-import org.learningjava.bmtool1.domain.model.SourcePair;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
+import org.learningjava.bmtool1.domain.model.pairs.BlockMapping;
+import org.learningjava.bmtool1.domain.model.pairs.PairId;
+import org.learningjava.bmtool1.domain.model.pairs.SourcePair;
 import org.learningjava.bmtool1.domain.service.ingest.BlockMapper;
 
 import java.nio.file.Path;

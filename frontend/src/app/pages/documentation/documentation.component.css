@@ -1,0 +1,90 @@
+
+/* Lists */
+.mycontent ul,
+.mycontent ol {
+    margin: 0.25rem 0 1rem 1.25rem;
+}
+.mycontent li + li {
+    margin-top: 0.25rem;
+}
+
+/* Figure placeholder */
+.mycontent figure {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: #fafafa;
+    text-align: center;
+}
+.mycontent figcaption {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* Code & pre */
+.mycontent code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.95em;
+    background: var(--code-bg);
+    padding: 0.1rem 0.35rem;
+    border-radius: 6px;
+}
+.mycontent pre {
+    background: var(--code-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+}
+.mycontent pre code {
+    background: transparent;
+    padding: 0;
+}
+
+/* Details/summary disclosure */
+.mycontent details {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    background: #fcfcfd;
+    margin: 0.75rem 0 1rem;
+}
+.mycontent summary {
+    cursor: pointer;
+    font-weight: 600;
+    outline: none;
+}
+.mycontent details[open] {
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 4px 14px rgba(0,0,0,0.04);
+}
+
+/* Small utility: a simple grid for any live metrics you might add later */
+.mycontent .equiv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0 1rem;
+}
+.mycontent .equiv-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    background: #fff;
+}
+.mycontent .equiv-card .label {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+.mycontent .equiv-card .value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 0.15rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+    .mycontent h2 { font-size: 1.35rem; }
+    .mycontent h3 { font-size: 1.1rem; }
+}

@@ -2,8 +2,8 @@ package org.learningjava.bmtool1.domain.service.ingest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.learningjava.bmtool1.domain.model.Block;
-import org.learningjava.bmtool1.domain.model.BlockMapping;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
+import org.learningjava.bmtool1.domain.model.pairs.BlockMapping;
 import org.learningjava.bmtool1.domain.policy.MappingConfig;
 import org.learningjava.bmtool1.domain.policy.MappingRule;
 import org.slf4j.Logger;

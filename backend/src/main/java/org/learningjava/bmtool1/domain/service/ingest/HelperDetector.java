@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.domain.service.ingest;
 
-import org.learningjava.bmtool1.domain.model.Block;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class HelperDetector {
             if ("METHOD".equals(block.type())) {
                 String firstLine = block.text().lines().findFirst().orElse("").trim();
 
-                // Rules (tweak as needed):
+                // Rules:
                 if (firstLine.startsWith("private")) {
                     isHelper = true;
                 }

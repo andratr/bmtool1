@@ -5,6 +5,7 @@ import {HelloComponent} from './pages/hello/hello.component';
 import {FactsComponent} from './pages/facts/facts.component';
 import {IngestionComponent} from './pages/ingestion/ingestion.component';
 import {AnalyticsComponent} from './pages/analytics/analytics.component';
+import {DocumentationComponent} from './pages/documentation/documentation.component';
 
 
 export const routes: Routes = [
@@ -13,7 +14,7 @@ export const routes: Routes = [
     {path: 'facts', component: FactsComponent},
     {path: 'query', component: QueryComponent},
     {path: 'experiment', component: ExperimentComponent},
-    {path: 'documentation', component: ExperimentComponent},
+    {path: 'documentation', component: DocumentationComponent},
     {path: 'analytics', component: AnalyticsComponent},
     {path: 'ingestion', component: IngestionComponent}
 ];

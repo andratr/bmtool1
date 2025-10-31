@@ -157,8 +157,8 @@ services:
       CLUSTER_HOSTNAME: 'node1'
       ENABLE_SCHEMA_AUTO_CREATE: 'true'
       HTTP_PORT: "${WEAVIATE_PORT}"
-    expose:
-      - "${WEAVIATE_PORT}"
+    ports:
+      - "${WEAVIATE_HOST_DEV_PORT}:${WEAVIATE_PORT}"
     volumes:
       - weaviate_data:/var/lib/weaviate
     restart: unless-stopped

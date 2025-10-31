@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.application.port;
 
-import org.learningjava.bmtool1.domain.model.SourcePair;
+import org.learningjava.bmtool1.domain.model.pairs.SourcePair;
 
 import java.util.List;
 

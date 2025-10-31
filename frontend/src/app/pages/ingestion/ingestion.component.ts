@@ -75,7 +75,6 @@ export class IngestionComponent implements OnDestroy {
         return Array.from(map.values());
     }
 
-    // ----- folder pick handlers -----
     onRagDirPicked(evt: Event) {
         const files = Array.from((evt.target as HTMLInputElement).files || []);
         this.ragFiles = files;
@@ -89,7 +88,6 @@ export class IngestionComponent implements OnDestroy {
         this.frameworkFolderName = this.folderNameFrom(files);
     }
 
-    // ----- file pick handlers (individual files) -----
     onRagFilesPicked(evt: Event) {
         const files = Array.from((evt.target as HTMLInputElement).files || []);
         if (!files.length) return;
@@ -218,7 +216,11 @@ export class IngestionComponent implements OnDestroy {
         this.jobFeed = [initial, ...this.jobFeed];
 
         const sub = interval(1000).subscribe(() => {
-            const path = type === 'RAG' ? `/rag/jobs/${jobId}` : `/framework/jobs/${jobId}`;
+            // IMPORTANT: keep /api prefix – matches your proxy
+            const path = type === 'RAG'
+                ? `/api/rag/jobs/${jobId}`
+                : `/api/framework/jobs/${jobId}`;
+
             this.http.get<JobStatus>(path).subscribe({
                 next: (status) => {
                     this.updateJob(status);
@@ -227,7 +229,9 @@ export class IngestionComponent implements OnDestroy {
                         this.busy = false;
                     }
                 },
-                error: () => {}
+                error: () => {
+                    // ignore transient poll errors; UI keeps last status
+                }
             });
         });
         this.pollers.set(jobId, sub);
@@ -245,7 +249,8 @@ export class IngestionComponent implements OnDestroy {
     }
 
     progressOf(j: JobStatus): number {
-        return j.total ? Math.round((j.processed / j.total) * 100) : (j.state === 'FAILED' ? 100 : 0);
+        if (j.state === 'DONE' || j.state === 'FAILED') return 100;
+        return j.total ? Math.round((j.processed / j.total) * 100) : 0;
     }
 
     badgeClass(j: JobStatus) {

@@ -2,7 +2,7 @@ package org.learningjava.bmtool1.infrastructure.adapter.in.template;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.learningjava.bmtool1.domain.model.TargetJavaClassForConsumer;
+import org.learningjava.bmtool1.domain.model.query.TargetJavaClassForConsumer;
 
 import java.io.StringWriter;
 

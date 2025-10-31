@@ -1,8 +1,8 @@
 package org.learningjava.bmtool1.infrastructure.adapter.out.fs;
 
 import org.learningjava.bmtool1.application.port.PairReaderPort;
-import org.learningjava.bmtool1.domain.model.PairId;
-import org.learningjava.bmtool1.domain.model.SourcePair;
+import org.learningjava.bmtool1.domain.model.pairs.PairId;
+import org.learningjava.bmtool1.domain.model.pairs.SourcePair;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

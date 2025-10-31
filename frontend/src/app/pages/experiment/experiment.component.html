@@ -1,12 +1,23 @@
-<!-- src/app/experiments/experiment.component.html -->
 <section class="mycontent">
     <div class="title">🧪 Experiments</div>
 
     <div class="filters">
-        <div><label>From</label><input type="date" [(ngModel)]="from" /></div>
-        <div><label>To</label><input type="date" [(ngModel)]="to" /></div>
-        <div class="grow"><label>Embedding</label><input type="text" [(ngModel)]="embedding" placeholder="e.g. text-embedding-3-large" /></div>
-        <div class="grow"><label>LLM</label><input type="text" [(ngModel)]="llm" placeholder="e.g. llama3" /></div>
+        <div>
+            <label>From</label>
+            <input type="date" [(ngModel)]="from" />
+        </div>
+        <div>
+            <label>To</label>
+            <input type="date" [(ngModel)]="to" />
+        </div>
+        <div class="grow">
+            <label>Embedding</label>
+            <input type="text" [(ngModel)]="embedding" placeholder="e.g. text-embedding-3-large" />
+        </div>
+        <div class="grow">
+            <label>LLM</label>
+            <input type="text" [(ngModel)]="llm" placeholder="e.g. llama3" />
+        </div>
         <div class="buttons">
             <button class="btn" (click)="reload()">Apply</button>
             <button class="btn ghost" (click)="reset()">Reset</button>
@@ -22,8 +33,16 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Date</th><th>Embedding</th><th>LLM</th><th>k</th>
-                    <th>Samples</th><th>RAG kept</th><th>CCC</th><th>Latency (ms)</th><th>CO₂ (g)</th><th>Prompt</th>
+                    <th>Date</th>
+                    <th>Embedding</th>
+                    <th>LLM</th>
+                    <th>kFw / kDoc</th>
+                    <th>Hits (fw / doc)</th>
+                    <th>Tok (p / c / t)</th>
+                    <th>CCC</th>
+                    <th>Latency (ms)</th>
+                    <th>CO₂ (g)</th>
+                    <th>Technique</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -31,13 +50,17 @@
                     <td>{{ e.experimentDate }}</td>
                     <td>{{ e.embeddingModel }}</td>
                     <td>{{ e.llmModel }}</td>
-                    <td>{{ e.k }}</td>
-                    <td>{{ e.numSamples }}</td>
-                    <td>{{ e.numRagSamples }}</td>
+                    <td>{{ e.kFw }} / {{ e.kDoc }}</td>
+                    <td>{{ e.fwHitsCount }} / {{ e.docHitsCount }}</td>
+                    <td>
+                        {{ (e.metric4PromptTok ?? '—') }} /
+                        {{ (e.metric5CompletionTok ?? '—') }} /
+                        {{ (e.metric6TotalTok ?? '—') }}
+                    </td>
                     <td>{{ show(e.metric1Ccc) }}</td>
                     <td>{{ show(e.metric2TimeMs) }}</td>
                     <td>{{ show(e.metric3Co2G) }}</td>
-                    <td><span class="prompt" [title]="e.prompt">{{ e.prompt }}</span></td>
+                    <td>{{ e.promptingTechnique || '—' }}</td>
                 </tr>
                 </tbody>
             </table>

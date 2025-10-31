@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
 import okhttp3.*;
 import org.learningjava.bmtool1.application.port.VectorStorePort;
-import org.learningjava.bmtool1.domain.model.BlockMapping;
-import org.learningjava.bmtool1.domain.model.RetrievalResult;
+import org.learningjava.bmtool1.domain.model.pairs.BlockMapping;
+import org.learningjava.bmtool1.domain.model.pairs.RetrievalResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -3,7 +3,7 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Dashboard – AI](product_screenshots/3.png)
 
 This tool aims to make it easier to benchmark different code translation AI techniques. It compares different approaches:
 * Prompt engineering
@@ -55,26 +55,54 @@ docker --version
 docker compose version
 ```
 
-### Installation
+* Clone
 
 ```sh
-# 1) Clone
 git clone https://github.com/andratr/bmtool1
 cd bmtool1
-
-# 2) Build images
-docker compose --profile dev up --build   
-docker compose --profile prod up --build   
 ```
 
+* Configure evironment variables
 
-## Usage
+The secrets/ folder holds secret files that are ignored by git. You commit only the *.example templates—never the real values.
+
+Steps to create your secret files from the template:
+
+1. Copy each *.example file to the same name without .example
+
+2. Put your real values in the non-.example files
+
+3. Never commit real values (already prevented by .gitignore)
+
+Tip: Get an OpenRouter API key at https://openrouter.ai/
+```sh
+# 1) secrets: duplicate templates → real files
+mkdir -p secrets
+cp secrets/openrouter_api_key.example           secrets/openrouter_api_key
+cp secrets/postgres_password.example            secrets/postgres_password
+cp secrets/spring.datasource.username.example   secrets/spring.datasource.username
+cp secrets/spring.datasource.password.example   secrets/spring.datasource.password
+
+# 2) fill in your real values (examples)
+# OpenRouter
+echo "sk-or-REPLACE_WITH_YOUR_KEY" > secrets/openrouter_api_key
+
+# Postgres / Spring (must match each other)
+echo "your-db-username"     > secrets/spring.datasource.username
+echo "your-password"        > secrets/spring.datasource.password
+echo "your-password"        > secrets/postgres_password
+
+# 3) check 
+ls -1 secrets
+test -s secrets/openrouter_api_key && echo "OpenRouter key set" || echo "OpenRouter key missing"
+
+```
 
 
 
 ## Runbook (Dev and Prod)
 
-### Dev profile (hot reload)
+### Dev profile (which has hot reload)
 
 Start:
 
@@ -102,18 +130,6 @@ docker compose --profile dev down
 docker compose --profile prod up -d --build backend frontend
 ```
 
-Quick checks:
-
-```sh
-# through Nginx with /api
-curl -i http://localhost:8085/api/query/ping
-
-# backend-direct (host to container mapping)
-curl -i http://localhost:8089/query/ping
-
-# open UI
-open http://localhost:8080
-```
 Restart all services:
 
 ```sh
@@ -124,59 +140,26 @@ docker compose --profile dev up -d
 Restart a single service:
 
 ```sh
-docker compose --profile prod up -d --build frontend   # changed Angular/nginx.conf
-docker compose --profile prod up -d --build backend    # changed backend
+docker compose --profile prod up -d --build frontend 
+docker compose --profile prod up -d --build backend   
 ```
 
-Debug Springboot:
+
+
+
+# Other useful commands
+
+
+Reset RAG Weaviate database entries:
 
 ```sh
-docker compose up -d backend-dev              
-docker compose logs -f backend-dev
+curl -sS -X DELETE "http://localhost:8090/v1/schema/PairChunk" | jq .
+
+curl -sS -X DELETE "http://localhost:8090/v1/schema/FrameworkSnippet" | jq .
 ```
 
-
-## Troubleshooting
-
-**HTML “Cannot POST …” from 8085**
-Angular dev proxy not in use. Ensure frontend-dev runs with:
-
-```
-ng serve --host 0.0.0.0 --port 8085 --proxy-config proxy.compose.dev.json
-```
-
-Recreate service:
-
-```sh
-docker compose --profile dev up -d --build frontend-dev
-```
-
-**CORS in dev**
-You’re probably calling full URLs. Use **relative** `/api/...` so the proxy handles it.
-
-**404 on `/api/...` but backend serves `/query/...`**
-Rewrites missing. Confirm:
-
-* Dev proxy has `"pathRewrite": { "^/api": "" }`
-* Nginx has `rewrite ^/api/(.*)$ /$1 break;`
-
-**Port already allocated**
-Bring other profile down:
-
-```sh
-docker compose --profile prod down
-docker compose --profile dev  down
-```
-
-**Dev hot reload sluggish**
-Enable IDE auto-make to `target/classes`:
-
-* IntelliJ → Build project automatically ✅
-* Advanced Settings → Allow auto-make while app running ✅
 
 ## Contributing
-
-Contributions are welcome!
 
 1. Fork the Project
 2. Create a Feature Branch (`git checkout -b feature/AmazingFeature`)

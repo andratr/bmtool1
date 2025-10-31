@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.application.port;
 
-import org.learningjava.bmtool1.domain.model.Experiment;
+import org.learningjava.bmtool1.domain.model.analytics.Experiment;
 
 import java.time.LocalDate;
 import java.util.List;

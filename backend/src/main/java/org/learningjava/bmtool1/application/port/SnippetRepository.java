@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.application.port;
 
-import org.learningjava.bmtool1.domain.model.PlsqlSnippet;
+import org.learningjava.bmtool1.domain.model.pairs.PlsqlSnippet;
 
 import java.util.List;
 import java.util.Map;

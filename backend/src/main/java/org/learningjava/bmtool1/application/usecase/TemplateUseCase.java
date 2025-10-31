@@ -1,7 +1,7 @@
 package org.learningjava.bmtool1.application.usecase;
 
-import org.learningjava.bmtool1.domain.model.Block;
-import org.learningjava.bmtool1.domain.model.TargetJavaClassForConsumer;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
+import org.learningjava.bmtool1.domain.model.query.TargetJavaClassForConsumer;
 import org.learningjava.bmtool1.domain.service.templateCreator.TemplateCreator;
 import org.learningjava.bmtool1.infrastructure.adapter.in.template.JavaGeneratorAdapter;
 import org.learningjava.bmtool1.infrastructure.adapter.out.blockASTParser.PlsqlBlockExtractorAdapter;

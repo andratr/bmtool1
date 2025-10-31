@@ -1,0 +1,24 @@
+<div class="analytics">
+    <h2>Analytics (Mock)</h2>
+    <p class="muted">Last updated: {{ lastUpdated | date:'medium' }}</p>
+
+    <div class="grid">
+        <div class="card" *ngFor="let c of cards">
+            <div class="value">{{ c.value }}</div>
+            <div class="label">{{ c.label }}</div>
+        </div>
+    </div>
+
+    <h3 style="margin-top:24px">Top Queries</h3>
+    <table class="table">
+        <thead>
+        <tr><th>Query</th><th class="right">Hits</th></tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let t of topQueries">
+            <td>{{ t.q }}</td>
+            <td class="right">{{ t.hits }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

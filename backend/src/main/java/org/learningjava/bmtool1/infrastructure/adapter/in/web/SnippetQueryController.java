@@ -1,7 +1,7 @@
 package org.learningjava.bmtool1.infrastructure.adapter.in.web;
 
 import org.learningjava.bmtool1.application.port.SnippetRepository;
-import org.learningjava.bmtool1.domain.model.PlsqlSnippet;
+import org.learningjava.bmtool1.domain.model.pairs.PlsqlSnippet;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

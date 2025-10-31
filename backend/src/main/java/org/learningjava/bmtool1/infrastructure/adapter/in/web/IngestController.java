@@ -3,7 +3,7 @@ package org.learningjava.bmtool1.infrastructure.adapter.in.web;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.learningjava.bmtool1.application.usecase.IngestPairsUseCase;
-import org.learningjava.bmtool1.domain.model.BlockMapping;
+import org.learningjava.bmtool1.domain.model.pairs.BlockMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

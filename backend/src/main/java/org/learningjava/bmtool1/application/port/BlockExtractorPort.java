@@ -1,6 +1,6 @@
 package org.learningjava.bmtool1.application.port;
 
-import org.learningjava.bmtool1.domain.model.Block;
+import org.learningjava.bmtool1.domain.model.pairs.Block;
 
 import java.nio.file.Path;
 import java.util.List;

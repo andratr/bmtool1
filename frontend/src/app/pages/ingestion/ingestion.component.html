@@ -1,120 +1,117 @@
 <div class="mycontent">
+    <div class="title">📥 Ingestion Dashboard</div>
 
+    <div class="two-col">
+        <!-- Pairs -->
+        <section class="card">
+            <h3>Add new known pairs</h3>
+            <p class="hint">Choose a folder (recursive) or select files.</p>
 
-<div class="title">📥 Ingestion Dashboard</div>
+            <div class="picker-row">
+                <!-- Folder input -->
+                <input
+                    #ragDir
+                    type="file"
+                    webkitdirectory
+                    multiple
+                    class="hidden-file"
+                    (click)="ragDir.value=''"
+                    (change)="onRagDirPicked($event)"
+                    [disabled]="busy"
+                />
+                <!-- Files input -->
+                <input
+                    #ragFilesInput
+                    type="file"
+                    multiple
+                    class="hidden-file"
+                    (click)="ragFilesInput.value=''"
+                    (change)="onRagFilesPicked($event)"
+                    [disabled]="busy"
+                    accept=".txt,.md,.json,.yaml,.yml,.java,.kt,.xml,.properties,.sql,.plsql,.pks,.pkb"
+                />
 
-<!-- Two side-by-side pickers -->
-<div class="two-col">
-    <!-- Left: Known pairs -->
-    <section class="card">
-        <h3>Add new known pairs</h3>
-        <p class="hint">Choose a folder (recursive) or select files.</p>
+                <button type="button" (click)="ragDir.click()" [disabled]="busy">Choose folder…</button>
+                <button type="button" (click)="ragFilesInput.click()" [disabled]="busy">Choose files…</button>
 
-        <div class="picker-row">
-            <!-- Folder input (hidden) -->
-            <input
-                #ragDir
-                type="file"
-                webkitdirectory
-                multiple
-                class="hidden-file"
-                (click)="ragDir.value=''"
-                (change)="onRagDirPicked($event)"
-                [disabled]="busy"
-            />
-            <!-- Files input (hidden) -->
-            <input
-                #ragFilesInput
-                type="file"
-                multiple
-                class="hidden-file"
-                (click)="ragFilesInput.value=''"
-                (change)="onRagFilesPicked($event)"
-                [disabled]="busy"
-                accept=".txt,.md,.json,.yaml,.yml,.java,.kt,.xml,.properties"
-            />
+                <span class="picked" *ngIf="ragFileCount > 0; else noRag">
+          📁 {{ ragFolderName || (ragFileCount + ' file(s)') }} — {{ ragFileCount }} files
+        </span>
+                <ng-template #noRag><span class="muted">Nothing selected</span></ng-template>
+            </div>
+        </section>
 
-            <button type="button" (click)="ragDir.click()" [disabled]="busy">Choose folder…</button>
-            <button type="button" (click)="ragFilesInput.click()" [disabled]="busy">Choose files…</button>
+        <!-- Frameworks -->
+        <section class="card">
+            <h3>Add new frameworks</h3>
+            <p class="hint">Choose a folder (recursive) or select files.</p>
 
-            <span class="picked" *ngIf="ragFileCount > 0; else noRag">
-        📁 {{ ragFolderName || (ragFileCount + ' file(s)') }} — {{ ragFileCount }} files
-      </span>
-            <ng-template #noRag><span class="muted">Nothing selected</span></ng-template>
-        </div>
-    </section>
+            <div class="picker-row">
+                <!-- Folder input -->
+                <input
+                    #fwDir
+                    type="file"
+                    webkitdirectory
+                    multiple
+                    class="hidden-file"
+                    (click)="fwDir.value=''"
+                    (change)="onFrameworkDirPicked($event)"
+                    [disabled]="busy"
+                />
+                <!-- Files input -->
+                <input
+                    #fwFilesInput
+                    type="file"
+                    multiple
+                    class="hidden-file"
+                    (click)="fwFilesInput.value=''"
+                    (change)="onFrameworkFilesPicked($event)"
+                    [disabled]="busy"
+                    accept=".java,.kt,.xml,.properties,.txt,.md,.json,.yaml,.yml"
+                />
 
-    <!-- Right: Frameworks -->
-    <section class="card">
-        <h3>Add new frameworks</h3>
-        <p class="hint">Choose a folder (recursive) or select files.</p>
+                <button type="button" (click)="fwDir.click()" [disabled]="busy">Choose folder…</button>
+                <button type="button" (click)="fwFilesInput.click()" [disabled]="busy">Choose files…</button>
 
-        <div class="picker-row">
-            <!-- Folder input (hidden) -->
-            <input
-                #fwDir
-                type="file"
-                webkitdirectory
-                multiple
-                class="hidden-file"
-                (click)="fwDir.value=''"
-                (change)="onFrameworkDirPicked($event)"
-                [disabled]="busy"
-            />
-            <!-- Files input (hidden) -->
-            <input
-                #fwFilesInput
-                type="file"
-                multiple
-                class="hidden-file"
-                (click)="fwFilesInput.value=''"
-                (change)="onFrameworkFilesPicked($event)"
-                [disabled]="busy"
-                accept=".java,.kt,.xml,.properties,.txt,.md,.json,.yaml,.yml"
-            />
-
-            <button type="button" (click)="fwDir.click()" [disabled]="busy">Choose folder…</button>
-            <button type="button" (click)="fwFilesInput.click()" [disabled]="busy">Choose files…</button>
-
-            <span class="picked" *ngIf="frameworkFileCount > 0; else noFw">
-        📁 {{ frameworkFolderName || (frameworkFileCount + ' file(s)') }} — {{ frameworkFileCount }} files
-      </span>
-            <ng-template #noFw><span class="muted">Nothing selected</span></ng-template>
-        </div>
-    </section>
-</div>
-
-<!-- Single Upload action under both cards -->
-<div class="actions">
-    <button (click)="onUpload()" [disabled]="busy || isUploadInvalid">Upload</button>
-</div>
-
-<!-- Error banner -->
-<div *ngIf="lastError" class="error-banner" role="alert">
-    {{ lastError }}
-</div>
-
-<!-- Loading bar appears below Upload -->
-<div class="loading" *ngIf="busy">
-    <div class="progress-bar">
-        <div class="progress" [style.width.%]="overallProgress"></div>
+                <span class="picked" *ngIf="frameworkFileCount > 0; else noFw">
+          📁 {{ frameworkFolderName || (frameworkFileCount + ' file(s)') }} — {{ frameworkFileCount }} files
+        </span>
+                <ng-template #noFw><span class="muted">Nothing selected</span></ng-template>
+            </div>
+        </section>
     </div>
-    <div class="muted" style="margin-top:6px">
-        Uploading… {{ overallProgress }}%
+
+    <!-- Upload -->
+    <div class="actions">
+        <button (click)="onUpload()" [disabled]="busy || isUploadInvalid">Upload</button>
     </div>
-</div>
 
-<hr />
+    <!-- Error banner -->
+    <div *ngIf="lastError" class="error-banner" role="alert">
+        {{ lastError }}
+    </div>
 
-<!-- Job Status -->
-<div class="jobs" *ngIf="jobFeed.length > 0">
-    <h3>Jobs</h3>
-    <div *ngFor="let job of jobFeed" class="job" [class]="badgeClass(job)">
-        <div><strong>{{ job.type }}</strong> — {{ job.state }}</div>
-        <div>{{ job.message }}</div>
+    <!-- Loading bar -->
+    <div class="loading" *ngIf="busy">
         <div class="progress-bar">
-            <div class="progress" [style.width.%]="progressOf(job)"></div>
+            <div class="progress" [style.width.%]="overallProgress"></div>
+        </div>
+        <div class="muted" style="margin-top:6px">
+            Uploading… {{ overallProgress }}%
         </div>
     </div>
-</div>
+
+    <hr />
+
+    <!-- Job Status -->
+    <div class="jobs" *ngIf="jobFeed.length > 0">
+        <h3>Jobs</h3>
+        <div *ngFor="let job of jobFeed" class="job" [class]="badgeClass(job)">
+            <div><strong>{{ job.type }}</strong> — {{ job.state }}</div>
+            <div>{{ job.message }}</div>
+            <div class="progress-bar">
+                <div class="progress" [style.width.%]="progressOf(job)"></div>
+            </div>
+        </div>
+    </div>
 </div>
